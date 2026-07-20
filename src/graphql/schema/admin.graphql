@@ -1,0 +1,427 @@
+# Admin schema extensions for Defined Academy backoffice (DEFINED app).
+
+enum DefinedAcademyCourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DefinedAcademyContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DefinedAcademyResourceStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DefinedAcademyPartnerStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum DefinedAcademyReferralCampaignStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum DefinedAcademyReferralSourceType {
+  SCHOOL
+  PARTNER
+  PROFESSIONAL
+  LINKEDIN
+  EMAIL
+  EVENT
+  SOCIAL
+  ORGANIC
+  OTHER
+}
+
+type DefinedAcademyAnalyticsSummary {
+  enrollments: Int!
+  courseStarts: Int!
+  lessonCompletions: Int!
+  courseCompletions: Int!
+  shortLinkVisits: Int!
+  referralVisits: Int!
+  referralRegistrations: Int!
+  referralEnrollments: Int!
+  activePartners: Int!
+  publishedCourses: Int!
+}
+
+type DefinedAcademyShortLink {
+  id: Int!
+  code: String!
+  destinationUrl: String!
+  status: DefinedAcademyShortLinkStatus!
+  visitCount: Int!
+  expiresAt: DateTime
+  courseId: Int
+  resourceId: Int
+  partnerId: Int
+  referralCampaignId: Int
+  createdAt: DateTime
+}
+
+type DefinedAcademyReferralCampaign {
+  id: Int!
+  name: String!
+  code: String!
+  description: String
+  sourceType: DefinedAcademyReferralSourceType!
+  status: DefinedAcademyReferralCampaignStatus!
+  partnerId: Int
+  courseId: Int
+  resourceId: Int
+  startsAt: DateTime
+  endsAt: DateTime
+}
+
+input CreateDefinedAcademyInput {
+  appId: Int
+  name: String!
+  slug: String!
+  description: String
+  status: DefinedAcademyStatus
+  logoUrl: String
+  settings: JSON
+}
+
+input UpdateDefinedAcademyInput {
+  name: String
+  slug: String
+  description: String
+  status: DefinedAcademyStatus
+  logoUrl: String
+  settings: JSON
+}
+
+input CreateDefinedAcademyCourseInput {
+  title: String!
+  slug: String!
+  summary: String
+  description: String
+  coverImageUrl: String
+  visibility: DefinedAcademyCourseVisibility
+  level: String
+  estimatedDurationMinutes: Int
+  sortOrder: Int
+}
+
+input UpdateDefinedAcademyCourseInput {
+  title: String
+  slug: String
+  summary: String
+  description: String
+  coverImageUrl: String
+  visibility: DefinedAcademyCourseVisibility
+  level: String
+  estimatedDurationMinutes: Int
+  sortOrder: Int
+}
+
+input CreateDefinedAcademyModuleInput {
+  title: String!
+  description: String
+  sortOrder: Int
+  status: DefinedAcademyContentStatus
+}
+
+input UpdateDefinedAcademyModuleInput {
+  title: String
+  description: String
+  sortOrder: Int
+  status: DefinedAcademyContentStatus
+}
+
+input CreateDefinedAcademyLessonInput {
+  title: String!
+  slug: String!
+  summary: String
+  description: String
+  lessonType: DefinedAcademyLessonType
+  videoUrl: String
+  videoProvider: String
+  videoDurationSeconds: Int
+  bodyContent: String
+  sortOrder: Int
+  visibility: DefinedAcademyCourseVisibility
+  isPreview: Boolean
+}
+
+input UpdateDefinedAcademyLessonInput {
+  title: String
+  slug: String
+  summary: String
+  description: String
+  lessonType: DefinedAcademyLessonType
+  videoUrl: String
+  videoProvider: String
+  videoDurationSeconds: Int
+  bodyContent: String
+  sortOrder: Int
+  visibility: DefinedAcademyCourseVisibility
+  isPreview: Boolean
+  status: DefinedAcademyContentStatus
+}
+
+input CreateDefinedAcademyResourceInput {
+  lessonId: Int
+  title: String!
+  description: String
+  type: DefinedAcademyResourceType!
+  fileUrl: String
+  externalUrl: String
+  textContent: String
+  mimeType: String
+  fileName: String
+  fileSize: Int
+  sortOrder: Int
+  visibility: DefinedAcademyCourseVisibility
+  downloadable: Boolean
+}
+
+input UpdateDefinedAcademyResourceInput {
+  lessonId: Int
+  title: String
+  description: String
+  type: DefinedAcademyResourceType
+  fileUrl: String
+  externalUrl: String
+  textContent: String
+  mimeType: String
+  fileName: String
+  fileSize: Int
+  sortOrder: Int
+  visibility: DefinedAcademyCourseVisibility
+  downloadable: Boolean
+  status: DefinedAcademyResourceStatus
+}
+
+input CreateDefinedAcademyPartnerCategoryInput {
+  name: String!
+  slug: String!
+  description: String
+  sortOrder: Int
+}
+
+input CreateDefinedAcademyPartnerInput {
+  categoryId: Int
+  name: String!
+  slug: String!
+  description: String
+  websiteUrl: String
+  contactUrl: String
+  logoUrl: String
+  location: String
+  status: DefinedAcademyPartnerStatus
+  featured: Boolean
+  sortOrder: Int
+}
+
+input UpdateDefinedAcademyPartnerInput {
+  categoryId: Int
+  name: String
+  slug: String
+  description: String
+  websiteUrl: String
+  contactUrl: String
+  logoUrl: String
+  location: String
+  status: DefinedAcademyPartnerStatus
+  featured: Boolean
+  sortOrder: Int
+}
+
+input CreateDefinedAcademyShortLinkInput {
+  destinationUrl: String!
+  resourceId: Int
+  courseId: Int
+  partnerId: Int
+  referralCampaignId: Int
+  customCode: String
+  expiresAt: DateTime
+}
+
+input CreateDefinedAcademyReferralCampaignInput {
+  name: String!
+  code: String
+  description: String
+  sourceType: DefinedAcademyReferralSourceType
+  partnerId: Int
+  courseId: Int
+  resourceId: Int
+  status: DefinedAcademyReferralCampaignStatus
+  startsAt: DateTime
+  endsAt: DateTime
+  metadata: JSON
+}
+
+input UpdateDefinedAcademyReferralCampaignInput {
+  name: String
+  code: String
+  description: String
+  sourceType: DefinedAcademyReferralSourceType
+  partnerId: Int
+  courseId: Int
+  resourceId: Int
+  status: DefinedAcademyReferralCampaignStatus
+  startsAt: DateTime
+  endsAt: DateTime
+  metadata: JSON
+}
+
+input ReorderDefinedAcademyItemInput {
+  id: Int!
+  sortOrder: Int!
+}
+
+input ReorderDefinedAcademyItemsInput {
+  parentId: Int!
+  items: [ReorderDefinedAcademyItemInput!]!
+}
+
+extend type DefinedAcademyCourse {
+  status: DefinedAcademyCourseStatus
+  publishedAt: DateTime
+  level: String
+}
+
+extend type DefinedAcademyModule {
+  status: DefinedAcademyContentStatus
+  description: String
+}
+
+extend type DefinedAcademyLesson {
+  status: DefinedAcademyContentStatus
+}
+
+extend type DefinedAcademyResource {
+  status: DefinedAcademyResourceStatus
+  lessonId: Int
+}
+
+extend type DefinedAcademyPartner {
+  status: DefinedAcademyPartnerStatus
+}
+
+extend type Query {
+  definedAcademy(id: Int!): DefinedAcademy
+  definedAcademies(appId: Int, status: DefinedAcademyStatus): [DefinedAcademy!]!
+  definedAcademyCourses(academyId: Int!): [DefinedAcademyCourse!]!
+  definedAcademyCourse(academyId: Int!, courseId: Int!): DefinedAcademyCourse
+  definedAcademyResources(academyId: Int!, lessonId: Int): [DefinedAcademyResource!]!
+  definedAcademyPartners(academyId: Int!): [DefinedAcademyPartner!]!
+  definedAcademyShortLinks(academyId: Int!): [DefinedAcademyShortLink!]!
+  definedAcademyReferralCampaigns(
+    academyId: Int!
+    status: DefinedAcademyReferralCampaignStatus
+  ): [DefinedAcademyReferralCampaign!]!
+  definedAcademyAnalyticsSummary(academyId: Int!): DefinedAcademyAnalyticsSummary!
+}
+
+extend type Mutation {
+  createDefinedAcademy(input: CreateDefinedAcademyInput!): DefinedAcademy!
+  updateDefinedAcademy(id: Int!, input: UpdateDefinedAcademyInput!): DefinedAcademy!
+  archiveDefinedAcademy(id: Int!): DefinedAcademy!
+
+  createDefinedAcademyCourse(
+    academyId: Int!
+    input: CreateDefinedAcademyCourseInput!
+  ): DefinedAcademyCourse!
+  updateDefinedAcademyCourse(
+    academyId: Int!
+    courseId: Int!
+    input: UpdateDefinedAcademyCourseInput!
+  ): DefinedAcademyCourse!
+  publishDefinedAcademyCourse(academyId: Int!, courseId: Int!): DefinedAcademyCourse!
+  archiveDefinedAcademyCourse(academyId: Int!, courseId: Int!): DefinedAcademyCourse!
+  reorderDefinedAcademyCourses(
+    academyId: Int!
+    input: ReorderDefinedAcademyItemsInput!
+  ): [DefinedAcademyCourse!]!
+
+  createDefinedAcademyModule(
+    academyId: Int!
+    courseId: Int!
+    input: CreateDefinedAcademyModuleInput!
+  ): DefinedAcademyModule!
+  updateDefinedAcademyModule(
+    academyId: Int!
+    moduleId: Int!
+    input: UpdateDefinedAcademyModuleInput!
+  ): DefinedAcademyModule!
+  reorderDefinedAcademyModules(
+    academyId: Int!
+    input: ReorderDefinedAcademyItemsInput!
+  ): [DefinedAcademyModule!]!
+
+  createDefinedAcademyLesson(
+    academyId: Int!
+    moduleId: Int!
+    input: CreateDefinedAcademyLessonInput!
+  ): DefinedAcademyLesson!
+  updateDefinedAcademyLesson(
+    academyId: Int!
+    lessonId: Int!
+    input: UpdateDefinedAcademyLessonInput!
+  ): DefinedAcademyLesson!
+  publishDefinedAcademyLesson(academyId: Int!, lessonId: Int!): DefinedAcademyLesson!
+  reorderDefinedAcademyLessons(
+    academyId: Int!
+    input: ReorderDefinedAcademyItemsInput!
+  ): [DefinedAcademyLesson!]!
+
+  createDefinedAcademyResource(
+    academyId: Int!
+    input: CreateDefinedAcademyResourceInput!
+  ): DefinedAcademyResource!
+  updateDefinedAcademyResource(
+    academyId: Int!
+    resourceId: Int!
+    input: UpdateDefinedAcademyResourceInput!
+  ): DefinedAcademyResource!
+  archiveDefinedAcademyResource(
+    academyId: Int!
+    resourceId: Int!
+  ): DefinedAcademyResource!
+
+  createDefinedAcademyPartnerCategory(
+    academyId: Int!
+    input: CreateDefinedAcademyPartnerCategoryInput!
+  ): DefinedAcademyPartnerCategory!
+  createDefinedAcademyPartner(
+    academyId: Int!
+    input: CreateDefinedAcademyPartnerInput!
+  ): DefinedAcademyPartner!
+  updateDefinedAcademyPartner(
+    academyId: Int!
+    partnerId: Int!
+    input: UpdateDefinedAcademyPartnerInput!
+  ): DefinedAcademyPartner!
+
+  createDefinedAcademyShortLink(
+    academyId: Int!
+    input: CreateDefinedAcademyShortLinkInput!
+  ): DefinedAcademyShortLink!
+  disableDefinedAcademyShortLink(
+    academyId: Int!
+    shortLinkId: Int!
+  ): DefinedAcademyShortLink!
+
+  createDefinedAcademyReferralCampaign(
+    academyId: Int!
+    input: CreateDefinedAcademyReferralCampaignInput!
+  ): DefinedAcademyReferralCampaign!
+  updateDefinedAcademyReferralCampaign(
+    academyId: Int!
+    campaignId: Int!
+    input: UpdateDefinedAcademyReferralCampaignInput!
+  ): DefinedAcademyReferralCampaign!
+}

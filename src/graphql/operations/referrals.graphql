@@ -1,0 +1,22 @@
+mutation CaptureDefinedAcademyReferral(
+  $input: CaptureDefinedAcademyReferralInput!
+) {
+  captureDefinedAcademyReferral(input: $input) {
+    id
+    referralCode
+    status
+    attributionExpiresAt
+    firstVisitedAt
+  }
+}
+
+mutation AttachDefinedAcademyReferralToCurrentUser(
+  $input: AttachDefinedAcademyReferralInput!
+) {
+  attachDefinedAcademyReferralToCurrentUser(input: $input) {
+    id
+    referralCode
+    status
+    registeredAt
+  }
+}

@@ -1,0 +1,154 @@
+query DefinedAcademyBySlug($slug: String!) {
+  definedAcademyBySlug(slug: $slug) {
+    id
+    slug
+    name
+    description
+    logoUrl
+    status
+    settings
+  }
+}
+
+query DefinedAcademyPublishedCourses($academySlug: String!) {
+  definedAcademyPublishedCourses(academySlug: $academySlug) {
+    id
+    slug
+    title
+    summary
+    coverImageUrl
+    visibility
+    estimatedDurationMinutes
+    sortOrder
+  }
+}
+
+query DefinedAcademyCourseBySlug($academySlug: String!, $courseSlug: String!) {
+  definedAcademyCourseBySlug(academySlug: $academySlug, courseSlug: $courseSlug) {
+    id
+    slug
+    title
+    summary
+    description
+    coverImageUrl
+    visibility
+    estimatedDurationMinutes
+    modules {
+      id
+      title
+      sortOrder
+      lessons {
+        id
+        slug
+        title
+        summary
+        lessonType
+        isPreview
+        visibility
+        sortOrder
+        videoDurationSeconds
+      }
+    }
+  }
+}
+
+query DefinedAcademyLessonBySlug(
+  $academySlug: String!
+  $courseSlug: String!
+  $lessonSlug: String!
+) {
+  definedAcademyLessonBySlug(
+    academySlug: $academySlug
+    courseSlug: $courseSlug
+    lessonSlug: $lessonSlug
+  ) {
+    id
+    slug
+    title
+    summary
+    description
+    lessonType
+    videoUrl
+    videoProvider
+    videoDurationSeconds
+    bodyContent
+    isPreview
+    visibility
+    resources {
+      id
+      title
+      description
+      type
+      fileUrl
+      externalUrl
+      textContent
+      mimeType
+      fileName
+      downloadable
+      sortOrder
+    }
+  }
+}
+
+query DefinedPublicAcademyResources($academySlug: String!, $lessonId: Int) {
+  definedPublicAcademyResources(academySlug: $academySlug, lessonId: $lessonId) {
+    id
+    title
+    description
+    type
+    fileUrl
+    externalUrl
+    textContent
+    mimeType
+    fileName
+    downloadable
+    sortOrder
+  }
+}
+
+query DefinedPublicAcademyPartners($academySlug: String!) {
+  definedPublicAcademyPartners(academySlug: $academySlug) {
+    id
+    slug
+    name
+    description
+    websiteUrl
+    contactUrl
+    logoUrl
+    location
+    featured
+    sortOrder
+    category {
+      id
+      name
+      slug
+    }
+  }
+}
+
+query DefinedAcademyPartnerBySlug($academySlug: String!, $partnerSlug: String!) {
+  definedAcademyPartnerBySlug(academySlug: $academySlug, partnerSlug: $partnerSlug) {
+    id
+    slug
+    name
+    description
+    websiteUrl
+    contactUrl
+    logoUrl
+    location
+    featured
+    category {
+      id
+      name
+      slug
+    }
+  }
+}
+
+query ResolveDefinedAcademyShortLink($code: String!) {
+  resolveDefinedAcademyShortLink(code: $code) {
+    code
+    destinationUrl
+    status
+  }
+}

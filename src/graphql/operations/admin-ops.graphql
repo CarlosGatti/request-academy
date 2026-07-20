@@ -1,0 +1,183 @@
+query DefinedAcademyResourcesAdmin($academyId: Int!, $lessonId: Int) {
+  definedAcademyResources(academyId: $academyId, lessonId: $lessonId) {
+    id
+    title
+    description
+    type
+    fileUrl
+    externalUrl
+    textContent
+    mimeType
+    fileName
+    downloadable
+    status
+    lessonId
+    sortOrder
+  }
+}
+
+mutation CreateDefinedAcademyResource(
+  $academyId: Int!
+  $input: CreateDefinedAcademyResourceInput!
+) {
+  createDefinedAcademyResource(academyId: $academyId, input: $input) {
+    id
+    title
+    type
+    status
+  }
+}
+
+mutation ArchiveDefinedAcademyResource($academyId: Int!, $resourceId: Int!) {
+  archiveDefinedAcademyResource(academyId: $academyId, resourceId: $resourceId) {
+    id
+    status
+  }
+}
+
+query DefinedAcademyPartnersAdmin($academyId: Int!) {
+  definedAcademyPartners(academyId: $academyId) {
+    id
+    slug
+    name
+    description
+    websiteUrl
+    contactUrl
+    logoUrl
+    location
+    featured
+    status
+    sortOrder
+    category {
+      id
+      name
+      slug
+    }
+  }
+}
+
+mutation CreateDefinedAcademyPartnerCategory(
+  $academyId: Int!
+  $input: CreateDefinedAcademyPartnerCategoryInput!
+) {
+  createDefinedAcademyPartnerCategory(academyId: $academyId, input: $input) {
+    id
+    name
+    slug
+  }
+}
+
+mutation CreateDefinedAcademyPartner(
+  $academyId: Int!
+  $input: CreateDefinedAcademyPartnerInput!
+) {
+  createDefinedAcademyPartner(academyId: $academyId, input: $input) {
+    id
+    slug
+    name
+    status
+  }
+}
+
+mutation UpdateDefinedAcademyPartner(
+  $academyId: Int!
+  $partnerId: Int!
+  $input: UpdateDefinedAcademyPartnerInput!
+) {
+  updateDefinedAcademyPartner(
+    academyId: $academyId
+    partnerId: $partnerId
+    input: $input
+  ) {
+    id
+    slug
+    name
+    description
+    websiteUrl
+    contactUrl
+    logoUrl
+    location
+    status
+    featured
+    sortOrder
+  }
+}
+
+query DefinedAcademyShortLinksAdmin($academyId: Int!) {
+  definedAcademyShortLinks(academyId: $academyId) {
+    id
+    code
+    destinationUrl
+    status
+    visitCount
+    expiresAt
+    courseId
+    partnerId
+    createdAt
+  }
+}
+
+mutation CreateDefinedAcademyShortLink(
+  $academyId: Int!
+  $input: CreateDefinedAcademyShortLinkInput!
+) {
+  createDefinedAcademyShortLink(academyId: $academyId, input: $input) {
+    id
+    code
+    destinationUrl
+    status
+  }
+}
+
+mutation DisableDefinedAcademyShortLink($academyId: Int!, $shortLinkId: Int!) {
+  disableDefinedAcademyShortLink(
+    academyId: $academyId
+    shortLinkId: $shortLinkId
+  ) {
+    id
+    status
+  }
+}
+
+query DefinedAcademyReferralCampaignsAdmin($academyId: Int!) {
+  definedAcademyReferralCampaigns(academyId: $academyId) {
+    id
+    name
+    code
+    description
+    sourceType
+    status
+    partnerId
+    courseId
+    startsAt
+    endsAt
+  }
+}
+
+mutation CreateDefinedAcademyReferralCampaign(
+  $academyId: Int!
+  $input: CreateDefinedAcademyReferralCampaignInput!
+) {
+  createDefinedAcademyReferralCampaign(academyId: $academyId, input: $input) {
+    id
+    name
+    code
+    status
+  }
+}
+
+mutation UpdateDefinedAcademyReferralCampaign(
+  $academyId: Int!
+  $campaignId: Int!
+  $input: UpdateDefinedAcademyReferralCampaignInput!
+) {
+  updateDefinedAcademyReferralCampaign(
+    academyId: $academyId
+    campaignId: $campaignId
+    input: $input
+  ) {
+    id
+    name
+    status
+  }
+}

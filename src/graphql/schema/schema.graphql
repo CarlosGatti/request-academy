@@ -1,0 +1,288 @@
+# Minimal schema stub for offline GraphQL Code Generator.
+# Prefer introspecting the live API when available:
+#   GRAPHQL_SCHEMA_URL=http://localhost:3000/graphql pnpm codegen
+
+scalar DateTime
+scalar JSON
+
+enum DefinedAcademyStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum DefinedAcademyCourseVisibility {
+  PUBLIC
+  AUTHENTICATED
+  PRIVATE
+}
+
+enum DefinedAcademyLessonType {
+  VIDEO
+  ARTICLE
+  RESOURCE
+  MIXED
+}
+
+enum DefinedAcademyResourceType {
+  PDF
+  IMAGE
+  FILE
+  TEXT
+  GUIDE
+  TEMPLATE
+  CHECKLIST
+  EXTERNAL_LINK
+  EMBED
+}
+
+enum DefinedAcademyShortLinkStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+}
+
+type DefinedAcademy {
+  id: Int!
+  slug: String!
+  name: String!
+  description: String
+  logoUrl: String
+  status: DefinedAcademyStatus!
+  settings: JSON
+}
+
+type DefinedAcademyCourse {
+  id: Int!
+  academyId: Int
+  slug: String!
+  title: String!
+  summary: String
+  description: String
+  coverImageUrl: String
+  visibility: DefinedAcademyCourseVisibility!
+  estimatedDurationMinutes: Int
+  sortOrder: Int
+  modules: [DefinedAcademyModule!]
+}
+
+type DefinedAcademyModule {
+  id: Int!
+  title: String!
+  sortOrder: Int
+  lessons: [DefinedAcademyLesson!]
+}
+
+type DefinedAcademyLesson {
+  id: Int!
+  slug: String!
+  title: String!
+  summary: String
+  description: String
+  lessonType: DefinedAcademyLessonType!
+  videoUrl: String
+  videoProvider: String
+  videoDurationSeconds: Int
+  bodyContent: String
+  isPreview: Boolean!
+  visibility: DefinedAcademyCourseVisibility
+  sortOrder: Int
+  resources: [DefinedAcademyResource!]
+}
+
+type DefinedAcademyResource {
+  id: Int!
+  title: String!
+  description: String
+  type: DefinedAcademyResourceType!
+  fileUrl: String
+  externalUrl: String
+  textContent: String
+  mimeType: String
+  fileName: String
+  downloadable: Boolean
+  sortOrder: Int
+}
+
+type DefinedAcademyPartner {
+  id: Int!
+  slug: String!
+  name: String!
+  description: String
+  websiteUrl: String
+  contactUrl: String
+  logoUrl: String
+  location: String
+  featured: Boolean
+  sortOrder: Int
+  category: DefinedAcademyPartnerCategory
+}
+
+type DefinedAcademyPartnerCategory {
+  id: Int!
+  name: String!
+  slug: String!
+}
+
+type DefinedAcademyShortlinkResolve {
+  code: String!
+  destinationUrl: String!
+  status: DefinedAcademyShortLinkStatus!
+}
+
+type DefinedAcademyReferral {
+  id: Int!
+  referralCode: String!
+  status: String!
+  attributionExpiresAt: DateTime
+  firstVisitedAt: DateTime
+  registeredAt: DateTime
+}
+
+type DefinedAcademyEnrollment {
+  id: Int!
+  courseId: Int!
+  status: String!
+  enrolledAt: DateTime
+  startedAt: DateTime
+  completedAt: DateTime
+  lastAccessedAt: DateTime
+  course: DefinedAcademyCourse
+}
+
+type DefinedAcademyCourseProgress {
+  enrollmentId: Int!
+  courseId: Int!
+  completedLessons: Int!
+  totalLessons: Int!
+  progressPercentage: Float!
+  enrollmentStatus: String!
+}
+
+type DefinedAcademyLessonProgress {
+  id: Int!
+  lessonId: Int!
+  status: String!
+  progressPercentage: Float
+  lastPositionSeconds: Int
+  startedAt: DateTime
+  completedAt: DateTime
+}
+
+type AuthUser {
+  id: Int!
+  email: String!
+  firstName: String
+  lastName: String
+  isAdmin: Boolean
+  apps: [String!]!
+}
+
+type LoginResult {
+  token: String!
+  user: AuthUser!
+}
+
+type RegisterResult {
+  success: Boolean!
+  message: String
+  email: String
+  requiresVerification: Boolean
+  token: String
+  user: AuthUser
+}
+
+type MutationResult {
+  success: Boolean!
+  message: String
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+input RegisterUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+input CaptureDefinedAcademyReferralInput {
+  academyId: Int!
+  referralCode: String!
+  campaignId: Int
+  referrerUserId: Int
+  partnerId: Int
+  metadata: JSON
+}
+
+input AttachDefinedAcademyReferralInput {
+  referralCode: String!
+}
+
+input UpdateDefinedAcademyLessonProgressInput {
+  progressPercentage: Float
+  lastPositionSeconds: Int
+}
+
+type Query {
+  definedAcademyBySlug(slug: String!): DefinedAcademy
+  definedAcademyPublishedCourses(academySlug: String!): [DefinedAcademyCourse!]!
+  definedAcademyCourseBySlug(
+    academySlug: String!
+    courseSlug: String!
+  ): DefinedAcademyCourse
+  definedAcademyLessonBySlug(
+    academySlug: String!
+    courseSlug: String!
+    lessonSlug: String!
+  ): DefinedAcademyLesson
+  definedPublicAcademyResources(
+    academySlug: String!
+    lessonId: Int
+  ): [DefinedAcademyResource!]!
+  definedPublicAcademyPartners(academySlug: String!): [DefinedAcademyPartner!]!
+  definedAcademyPartnerBySlug(
+    academySlug: String!
+    partnerSlug: String!
+  ): DefinedAcademyPartner
+  resolveDefinedAcademyShortLink(code: String!): DefinedAcademyShortlinkResolve
+  myDefinedAcademyEnrollments(academyId: Int): [DefinedAcademyEnrollment!]!
+  myDefinedAcademyEnrollment(enrollmentId: Int!): DefinedAcademyEnrollment
+  myDefinedAcademyCourseProgress(courseId: Int!): DefinedAcademyCourseProgress
+  myDefinedAcademyLessonProgress(
+    enrollmentId: Int!
+    lessonId: Int!
+  ): DefinedAcademyLessonProgress
+}
+
+type Mutation {
+  login(user: LoginUserInput!): LoginResult!
+  register(user: RegisterUserInput!, appCode: String): RegisterResult!
+  verifyEmail(token: String!): MutationResult!
+  resendVerificationEmail(email: String!): MutationResult!
+  requestPasswordReset(email: String!): MutationResult!
+  resetPassword(token: String!, password: String!): MutationResult!
+  captureDefinedAcademyReferral(
+    input: CaptureDefinedAcademyReferralInput!
+  ): DefinedAcademyReferral!
+  attachDefinedAcademyReferralToCurrentUser(
+    input: AttachDefinedAcademyReferralInput!
+  ): DefinedAcademyReferral
+  enrollInDefinedAcademyCourse(courseId: Int!): DefinedAcademyEnrollment!
+  startDefinedAcademyLesson(
+    enrollmentId: Int!
+    lessonId: Int!
+  ): DefinedAcademyLessonProgress!
+  updateDefinedAcademyLessonProgress(
+    enrollmentId: Int!
+    lessonId: Int!
+    input: UpdateDefinedAcademyLessonProgressInput!
+  ): DefinedAcademyLessonProgress!
+  completeDefinedAcademyLesson(
+    enrollmentId: Int!
+    lessonId: Int!
+  ): DefinedAcademyLessonProgress!
+}

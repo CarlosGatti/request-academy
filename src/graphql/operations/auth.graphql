@@ -1,0 +1,58 @@
+mutation Login($user: LoginUserInput!) {
+  login(user: $user) {
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      isAdmin
+      apps
+    }
+  }
+}
+
+mutation Register($user: RegisterUserInput!, $appCode: String) {
+  register(user: $user, appCode: $appCode) {
+    success
+    message
+    email
+    requiresVerification
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      apps
+    }
+  }
+}
+
+mutation VerifyEmail($token: String!) {
+  verifyEmail(token: $token) {
+    success
+    message
+  }
+}
+
+mutation ResendVerificationEmail($email: String!) {
+  resendVerificationEmail(email: $email) {
+    success
+    message
+  }
+}
+
+mutation RequestPasswordReset($email: String!) {
+  requestPasswordReset(email: $email) {
+    success
+    message
+  }
+}
+
+mutation ResetPassword($token: String!, $password: String!) {
+  resetPassword(token: $token, password: $password) {
+    success
+    message
+  }
+}

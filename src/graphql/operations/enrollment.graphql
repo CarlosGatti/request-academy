@@ -1,0 +1,95 @@
+mutation EnrollInDefinedAcademyCourse($courseId: Int!) {
+  enrollInDefinedAcademyCourse(courseId: $courseId) {
+    id
+    courseId
+    status
+    enrolledAt
+    lastAccessedAt
+  }
+}
+
+query MyDefinedAcademyEnrollments($academyId: Int) {
+  myDefinedAcademyEnrollments(academyId: $academyId) {
+    id
+    courseId
+    status
+    enrolledAt
+    startedAt
+    completedAt
+    lastAccessedAt
+    course {
+      id
+      slug
+      title
+      summary
+      coverImageUrl
+      estimatedDurationMinutes
+      academyId
+    }
+  }
+}
+
+query MyDefinedAcademyCourseProgress($courseId: Int!) {
+  myDefinedAcademyCourseProgress(courseId: $courseId) {
+    enrollmentId
+    courseId
+    completedLessons
+    totalLessons
+    progressPercentage
+    enrollmentStatus
+  }
+}
+
+query MyDefinedAcademyLessonProgress($enrollmentId: Int!, $lessonId: Int!) {
+  myDefinedAcademyLessonProgress(
+    enrollmentId: $enrollmentId
+    lessonId: $lessonId
+  ) {
+    id
+    lessonId
+    status
+    progressPercentage
+    lastPositionSeconds
+    startedAt
+    completedAt
+  }
+}
+
+mutation StartDefinedAcademyLesson($enrollmentId: Int!, $lessonId: Int!) {
+  startDefinedAcademyLesson(enrollmentId: $enrollmentId, lessonId: $lessonId) {
+    id
+    lessonId
+    status
+    progressPercentage
+    lastPositionSeconds
+    startedAt
+  }
+}
+
+mutation UpdateDefinedAcademyLessonProgress(
+  $enrollmentId: Int!
+  $lessonId: Int!
+  $input: UpdateDefinedAcademyLessonProgressInput!
+) {
+  updateDefinedAcademyLessonProgress(
+    enrollmentId: $enrollmentId
+    lessonId: $lessonId
+    input: $input
+  ) {
+    id
+    lessonId
+    status
+    progressPercentage
+    lastPositionSeconds
+  }
+}
+
+mutation CompleteDefinedAcademyLesson($enrollmentId: Int!, $lessonId: Int!) {
+  completeDefinedAcademyLesson(enrollmentId: $enrollmentId, lessonId: $lessonId) {
+    id
+    lessonId
+    status
+    progressPercentage
+    completedAt
+  }
+}

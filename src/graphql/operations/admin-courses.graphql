@@ -1,0 +1,261 @@
+query DefinedAcademies($status: DefinedAcademyStatus) {
+  definedAcademies(status: $status) {
+    id
+    slug
+    name
+    description
+    logoUrl
+    status
+  }
+}
+
+query DefinedAcademyAdmin($id: Int!) {
+  definedAcademy(id: $id) {
+    id
+    slug
+    name
+    description
+    logoUrl
+    status
+    settings
+  }
+}
+
+query DefinedAcademyAnalyticsSummary($academyId: Int!) {
+  definedAcademyAnalyticsSummary(academyId: $academyId) {
+    enrollments
+    courseStarts
+    lessonCompletions
+    courseCompletions
+    shortLinkVisits
+    referralVisits
+    referralRegistrations
+    referralEnrollments
+    activePartners
+    publishedCourses
+  }
+}
+
+query DefinedAcademyCoursesAdmin($academyId: Int!) {
+  definedAcademyCourses(academyId: $academyId) {
+    id
+    slug
+    title
+    summary
+    coverImageUrl
+    visibility
+    status
+    estimatedDurationMinutes
+    sortOrder
+    publishedAt
+    modules {
+      id
+      title
+      sortOrder
+      status
+      lessons {
+        id
+        slug
+        title
+        lessonType
+        status
+        isPreview
+        sortOrder
+      }
+    }
+  }
+}
+
+query DefinedAcademyCourseAdmin($academyId: Int!, $courseId: Int!) {
+  definedAcademyCourse(academyId: $academyId, courseId: $courseId) {
+    id
+    slug
+    title
+    summary
+    description
+    coverImageUrl
+    visibility
+    status
+    level
+    estimatedDurationMinutes
+    sortOrder
+    publishedAt
+    modules {
+      id
+      title
+      description
+      sortOrder
+      status
+      lessons {
+        id
+        slug
+        title
+        summary
+        lessonType
+        videoUrl
+        bodyContent
+        status
+        isPreview
+        visibility
+        sortOrder
+      }
+    }
+  }
+}
+
+mutation CreateDefinedAcademyCourse(
+  $academyId: Int!
+  $input: CreateDefinedAcademyCourseInput!
+) {
+  createDefinedAcademyCourse(academyId: $academyId, input: $input) {
+    id
+    slug
+    title
+    status
+  }
+}
+
+mutation UpdateDefinedAcademyCourse(
+  $academyId: Int!
+  $courseId: Int!
+  $input: UpdateDefinedAcademyCourseInput!
+) {
+  updateDefinedAcademyCourse(
+    academyId: $academyId
+    courseId: $courseId
+    input: $input
+  ) {
+    id
+    title
+    status
+  }
+}
+
+mutation PublishDefinedAcademyCourse($academyId: Int!, $courseId: Int!) {
+  publishDefinedAcademyCourse(academyId: $academyId, courseId: $courseId) {
+    id
+    status
+    publishedAt
+  }
+}
+
+mutation ArchiveDefinedAcademyCourse($academyId: Int!, $courseId: Int!) {
+  archiveDefinedAcademyCourse(academyId: $academyId, courseId: $courseId) {
+    id
+    status
+  }
+}
+
+mutation CreateDefinedAcademyModule(
+  $academyId: Int!
+  $courseId: Int!
+  $input: CreateDefinedAcademyModuleInput!
+) {
+  createDefinedAcademyModule(
+    academyId: $academyId
+    courseId: $courseId
+    input: $input
+  ) {
+    id
+    title
+    status
+  }
+}
+
+mutation CreateDefinedAcademyLesson(
+  $academyId: Int!
+  $moduleId: Int!
+  $input: CreateDefinedAcademyLessonInput!
+) {
+  createDefinedAcademyLesson(
+    academyId: $academyId
+    moduleId: $moduleId
+    input: $input
+  ) {
+    id
+    slug
+    title
+    lessonType
+    status
+  }
+}
+
+mutation PublishDefinedAcademyLesson($academyId: Int!, $lessonId: Int!) {
+  publishDefinedAcademyLesson(academyId: $academyId, lessonId: $lessonId) {
+    id
+    status
+  }
+}
+
+mutation UpdateDefinedAcademyLesson(
+  $academyId: Int!
+  $lessonId: Int!
+  $input: UpdateDefinedAcademyLessonInput!
+) {
+  updateDefinedAcademyLesson(
+    academyId: $academyId
+    lessonId: $lessonId
+    input: $input
+  ) {
+    id
+    title
+    summary
+    lessonType
+    videoUrl
+    bodyContent
+    status
+    isPreview
+  }
+}
+
+mutation UpdateDefinedAcademy(
+  $id: Int!
+  $input: UpdateDefinedAcademyInput!
+) {
+  updateDefinedAcademy(id: $id, input: $input) {
+    id
+    name
+    slug
+    description
+    logoUrl
+    status
+    settings
+  }
+}
+
+mutation UpdateDefinedAcademyModule(
+  $academyId: Int!
+  $moduleId: Int!
+  $input: UpdateDefinedAcademyModuleInput!
+) {
+  updateDefinedAcademyModule(
+    academyId: $academyId
+    moduleId: $moduleId
+    input: $input
+  ) {
+    id
+    title
+    sortOrder
+    status
+  }
+}
+
+mutation ReorderDefinedAcademyModules(
+  $academyId: Int!
+  $input: ReorderDefinedAcademyItemsInput!
+) {
+  reorderDefinedAcademyModules(academyId: $academyId, input: $input) {
+    id
+    sortOrder
+  }
+}
+
+mutation ReorderDefinedAcademyLessons(
+  $academyId: Int!
+  $input: ReorderDefinedAcademyItemsInput!
+) {
+  reorderDefinedAcademyLessons(academyId: $academyId, input: $input) {
+    id
+    sortOrder
+  }
+}
