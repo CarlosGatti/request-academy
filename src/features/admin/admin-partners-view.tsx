@@ -102,7 +102,12 @@ function PartnerEditForm({
         </div>
         <div className="space-y-2">
           <Label>Status</Label>
-          <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <Select
+            value={status}
+            onChange={(e) =>
+              setStatus(e.target.value as DefinedAcademyPartnerStatus)
+            }
+          >
             <option value="DRAFT">Draft</option>
             <option value="ACTIVE">Active</option>
             <option value="ARCHIVED">Archived</option>
