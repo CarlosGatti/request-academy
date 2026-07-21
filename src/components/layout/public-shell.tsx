@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 
 export function PublicHeader() {
   const academySlug = clientEnv.NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG;
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hasDefinedAccess } = useAuth();
 
   return (
     <header className="border-b border-border bg-primary text-sea-foam">
@@ -39,12 +39,22 @@ export function PublicHeader() {
             Partners
           </Link>
           {isAuthenticated ? (
-            <Link
-              href="/workspace"
-              className="rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent/90"
-            >
-              Workspace
-            </Link>
+            <>
+              {hasDefinedAccess ? (
+                <Link
+                  href="/admin"
+                  className="hidden opacity-90 hover:opacity-100 sm:inline"
+                >
+                  Admin
+                </Link>
+              ) : null}
+              <Link
+                href="/workspace"
+                className="rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent/90"
+              >
+                Workspace
+              </Link>
+            </>
           ) : (
             <Link
               href="/login"

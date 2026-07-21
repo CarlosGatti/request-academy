@@ -149,6 +149,12 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
             ))}
           </Select>
         ) : null}
+        <Link
+          href="/workspace"
+          className="hidden text-sm text-sea-foam/80 hover:text-sea-foam sm:inline"
+        >
+          Workspace
+        </Link>
         <ChromeUserLabel>{user?.email}</ChromeUserLabel>
         <ChromeSignOutButton
           onClick={() => {

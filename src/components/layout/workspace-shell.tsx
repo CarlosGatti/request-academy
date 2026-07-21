@@ -18,7 +18,7 @@ const nav = [
   { href: "/workspace/resources", label: "Resources" },
   { href: "/workspace/downloads", label: "Downloads" },
   { href: "/workspace/partners", label: "Network" },
-];
+] as const;
 
 function isActive(pathname: string, href: string, exact?: boolean) {
   if (exact) return pathname === href;
@@ -28,7 +28,13 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 export function WorkspaceShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, clearSession, isAuthenticated, isLoading } = useAuth();
+  const { user, clearSession, isAuthenticated, isLoading, hasDefinedAccess } =
+    useAuth();
+
+  const items: Array<{ href: string; label: string; exact?: boolean }> =
+    hasDefinedAccess
+      ? [...nav, { href: "/admin", label: "Admin" }]
+      : [...nav];
 
   if (isLoading) {
     return (
@@ -94,7 +100,7 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col md:flex-row">
         <aside className="border-b border-border bg-surface md:w-56 md:border-b-0 md:border-r">
           <nav className="flex gap-1 overflow-x-auto p-3 md:flex-col">
-            {nav.map((item) => (
+            {items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
