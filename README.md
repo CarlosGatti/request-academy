@@ -30,11 +30,12 @@ Open [http://localhost:3000](http://localhost:3000) — redirects to `/academy/r
 | Variable | Purpose |
 |----------|---------|
 | `NEXT_PUBLIC_GRAPHQL_URL` | boxhub-nest-api GraphQL endpoint |
-| `NEXT_PUBLIC_API_BASE_URL` | Optional REST origin (defaults to GraphQL host); used for rewrites + direct upload mode |
-| `ACADEMY_API_ORIGIN` | Optional server-only override for Next rewrites (`/academy/upload/*`, `/uploads/*`) |
-| `NEXT_PUBLIC_UPLOAD_DIRECT` | Set `true` to POST uploads straight to the API origin (needs CORS); default uses same-origin rewrite |
+| `NEXT_PUBLIC_API_BASE_URL` | Optional REST origin for `/academy/upload/*` (defaults to GraphQL host) |
+| `ACADEMY_API_ORIGIN` | Optional server-only override for `/uploads/*` rewrites |
 | `NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG` | Default tenant slug (`re-quest-academy`) |
 | `NEXT_PUBLIC_APP_NAME` | App metadata title |
+
+Uploads call `{API_ORIGIN}/academy/upload/...` directly. In production, Nginx on `discart.me` must allow CORS for the frontend origin on `/academy/upload` (see `boxhub-nest-api/nginx-template.conf`).
 
 Do **not** hardcode academy IDs — resolve via `definedAcademyBySlug`.
 

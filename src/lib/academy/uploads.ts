@@ -37,16 +37,10 @@ export class AcademyUploadError extends Error {
 }
 
 /**
- * Upload endpoints go through a same-origin Next rewrite
- * (`/academy/upload/*` → API host) so production browsers avoid CORS.
- * Set NEXT_PUBLIC_UPLOAD_DIRECT=true to call the API origin directly.
+ * Uploads POST directly to the Nest API host (`discart.me` in production).
+ * Production Nginx must allow the frontend origin for `/academy/upload`
+ * (same pattern already used for `/graphql`).
  */
-function resolveUploadUrl(path: string) {
-  const direct = process.env.NEXT_PUBLIC_UPLOAD_DIRECT === "true";
-  if (direct) return `${clientEnv.apiBaseUrl}${path}`;
-  return path.startsWith("/") ? path : `/${path}`;
-}
-
 async function postMultipart<T>(
   path: string,
   form: FormData,
@@ -56,7 +50,7 @@ async function postMultipart<T>(
     throw new AcademyUploadError("Sign in required to upload files.", 401);
   }
 
-  const response = await fetch(resolveUploadUrl(path), {
+  const response = await fetch(`${clientEnv.apiBaseUrl}${path}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

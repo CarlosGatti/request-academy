@@ -42,13 +42,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     if (!apiOrigin) return [];
 
-    // Same-origin proxy so browser uploads avoid cross-origin preflight.
-    // Production Nginx currently only adds CORS on /graphql, not /academy/upload.
+    // Proxy media URLs stored as /uploads/... so the Vercel app can serve them.
+    // Uploads themselves POST directly to the API host (see uploads.ts) — that
+    // requires Nginx CORS for the frontend origin in production.
     return [
-      {
-        source: "/academy/upload/:path*",
-        destination: `${apiOrigin}/academy/upload/:path*`,
-      },
       {
         source: "/uploads/:path*",
         destination: `${apiOrigin}/uploads/:path*`,
