@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 function resolveApiOrigin(): string | null {
   const override =
-    process.env.ACADEMY_API_ORIGIN || process.env.NEXT_PUBLIC_API_BASE_URL;
+    process.env.ACADEMY_API_ORIGIN ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL;
   if (override) return override.replace(/\/$/, "");
 
   const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL;

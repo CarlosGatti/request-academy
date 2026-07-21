@@ -29,13 +29,16 @@ Open [http://localhost:3000](http://localhost:3000) — redirects to `/academy/r
 
 | Variable | Purpose |
 |----------|---------|
-| `NEXT_PUBLIC_GRAPHQL_URL` | boxhub-nest-api GraphQL endpoint |
-| `NEXT_PUBLIC_API_BASE_URL` | Optional REST origin for `/academy/upload/*` (defaults to GraphQL host) |
+| `NEXT_PUBLIC_GRAPHQL_URL` | boxhub-nest-api GraphQL endpoint (`https://www.discart.me/graphql`) |
+| `NEXT_PUBLIC_API_URL` | REST origin for uploads (`https://www.discart.me`) — preferred |
+| `NEXT_PUBLIC_API_BASE_URL` | Alias of `NEXT_PUBLIC_API_URL` (optional) |
 | `ACADEMY_API_ORIGIN` | Optional server-only override for `/uploads/*` rewrites |
 | `NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG` | Default tenant slug (`re-quest-academy`) |
 | `NEXT_PUBLIC_APP_NAME` | App metadata title |
 
-Uploads call `{API_ORIGIN}/academy/upload/...` directly. In production, Nginx on `discart.me` must allow CORS for the frontend origin on `/academy/upload` (see `boxhub-nest-api/nginx-template.conf`).
+Cover upload flow: create program via GraphQL → `POST {NEXT_PUBLIC_API_URL}/academy/upload/programs/cover` with JWT + `file`/`academyId`/`courseId`. Backend sets `coverImageUrl` automatically.
+
+Production Nginx must allow CORS for the frontend origin on `/academy/upload` (GraphQL CORS alone is not enough). See `boxhub-nest-api/nginx-template.conf`.
 
 Do **not** hardcode academy IDs — resolve via `definedAcademyBySlug`.
 

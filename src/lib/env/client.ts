@@ -2,7 +2,12 @@ import { z } from "zod";
 
 const clientEnvSchema = z.object({
   NEXT_PUBLIC_GRAPHQL_URL: z.url(),
-  /** Optional override; defaults to GraphQL origin (strip `/graphql`). */
+  /**
+   * REST API origin for uploads (`/academy/upload/*`).
+   * Prefer `NEXT_PUBLIC_API_URL` (docs / Vercel). Falls back to
+   * `NEXT_PUBLIC_API_BASE_URL`, then GraphQL origin.
+   */
+  NEXT_PUBLIC_API_URL: z.string().url().optional(),
   NEXT_PUBLIC_API_BASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG: z
     .string()
@@ -12,15 +17,19 @@ const clientEnvSchema = z.object({
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema> & {
-  /** REST API origin for uploads (e.g. http://localhost:3000) */
+  /** REST API origin for uploads (e.g. https://www.discart.me) */
   apiBaseUrl: string;
 };
 
-function deriveApiBaseUrl(graphqlUrl: string, override?: string): string {
+function deriveApiBaseUrl(
+  graphqlUrl: string,
+  apiUrl?: string,
+  apiBaseUrl?: string,
+): string {
+  const override = apiUrl || apiBaseUrl;
   if (override) return override.replace(/\/$/, "");
   try {
-    const url = new URL(graphqlUrl);
-    return url.origin;
+    return new URL(graphqlUrl).origin;
   } catch {
     return graphqlUrl.replace(/\/graphql\/?$/, "");
   }
@@ -29,6 +38,7 @@ function deriveApiBaseUrl(graphqlUrl: string, override?: string): string {
 function readClientEnv(): ClientEnv {
   const parsed = clientEnvSchema.safeParse({
     NEXT_PUBLIC_GRAPHQL_URL: process.env.NEXT_PUBLIC_GRAPHQL_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || undefined,
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || undefined,
     NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG:
       process.env.NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG ?? "re-quest-academy",
@@ -47,6 +57,7 @@ function readClientEnv(): ClientEnv {
     ...parsed.data,
     apiBaseUrl: deriveApiBaseUrl(
       parsed.data.NEXT_PUBLIC_GRAPHQL_URL,
+      parsed.data.NEXT_PUBLIC_API_URL,
       parsed.data.NEXT_PUBLIC_API_BASE_URL,
     ),
   };
