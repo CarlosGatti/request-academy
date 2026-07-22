@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { CourseCard } from "@/components/courses/course-card";
@@ -10,6 +9,7 @@ import { Alert } from "@/components/ui/alert";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLoading } from "@/components/ui/page-loading";
+import { HeroBanner } from "@/features/academy/hero-banner";
 import { ReferralCapture } from "@/features/referrals/capture";
 import {
   DefinedAcademyBySlugDocument,
@@ -73,7 +73,7 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
       </Suspense>
 
       <section className="border-b border-border bg-surface">
-        <Container className="grid gap-8 py-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        <Container className="grid gap-8 py-12 lg:grid-cols-[0.95fr_1.15fr] lg:items-center">
           <div className="space-y-5">
             <p className="text-sm font-medium tracking-wide text-accent uppercase">
               Professional growth
@@ -106,17 +106,8 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
               </Link>
             </div>
           </div>
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative h-36 w-full max-w-sm bg-primary p-4 sm:h-40">
-              <Image
-                src={theme.logoUrl || "/brand/re-quest/logo-white.png"}
-                alt={theme.name}
-                fill
-                className="object-contain scale-150"
-                sizes="320px"
-                priority
-              />
-            </div>
+          <div className="w-full min-w-0">
+            <HeroBanner />
           </div>
         </Container>
       </section>

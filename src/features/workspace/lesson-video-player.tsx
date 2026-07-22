@@ -4,6 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { UpdateDefinedAcademyLessonProgressDocument } from "@/graphql/generated/graphql";
 import { useDebouncedCallback } from "@/lib/hooks/use-debounced-callback";
+import { toVideoEmbedUrl } from "@/lib/media/video-embed";
 
 const PROGRESS_INTERVAL_MS = 15_000;
 
@@ -15,15 +16,6 @@ type Props = {
   initialPositionSeconds?: number | null;
   onProgressSaved?: () => void;
 };
-
-function isEmbedUrl(url: string) {
-  return (
-    url.includes("youtube.com") ||
-    url.includes("youtu.be") ||
-    url.includes("vimeo.com") ||
-    url.includes("embed")
-  );
-}
 
 export function LessonVideoPlayer({
   enrollmentId,
@@ -37,6 +29,10 @@ export function LessonVideoPlayer({
   const [updateProgress] = useMutation(UpdateDefinedAcademyLessonProgressDocument);
   const lastSentRef = useRef(0);
   const resumedRef = useRef(false);
+  const embedUrl =
+    toVideoEmbedUrl(videoUrl) ??
+    (videoUrl.includes("/embed/") ? videoUrl.trim() : null);
+  const isEmbed = embedUrl != null;
 
   const sendProgress = useCallback(
     async (currentTime: number, duration: number) => {
@@ -74,7 +70,7 @@ export function LessonVideoPlayer({
   );
 
   useEffect(() => {
-    if (isEmbedUrl(videoUrl)) return;
+    if (isEmbed) return;
 
     const video = videoRef.current;
     const interval = setInterval(() => {
@@ -85,21 +81,22 @@ export function LessonVideoPlayer({
 
     return () => {
       clearInterval(interval);
-      if (video && !isEmbedUrl(videoUrl)) {
+      if (video && !isEmbed) {
         void sendProgress(video.currentTime, video.duration || 0);
       }
     };
-  }, [sendProgress, videoUrl]);
+  }, [isEmbed, sendProgress]);
 
-  if (isEmbedUrl(videoUrl)) {
+  if (embedUrl) {
     return (
       <div className="space-y-2">
         <div className="aspect-video overflow-hidden border border-border bg-primary/5">
           <iframe
-            src={videoUrl}
+            src={embedUrl}
             title={title}
             className="h-full w-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         </div>

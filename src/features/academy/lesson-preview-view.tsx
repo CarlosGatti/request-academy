@@ -13,19 +13,20 @@ import { DefinedAcademyLessonBySlugDocument } from "@/graphql/generated/graphql"
 import { formatDurationSeconds } from "@/lib/academy/labels";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
+import { toVideoEmbedUrl } from "@/lib/media/video-embed";
 
 function VideoEmbed({ url, title }: { url: string; title: string }) {
-  const isYouTube =
-    url.includes("youtube.com") || url.includes("youtu.be") || url.includes("vimeo.com");
+  const embedUrl = toVideoEmbedUrl(url);
 
-  if (isYouTube || url.includes("embed")) {
+  if (embedUrl) {
     return (
       <div className="aspect-video overflow-hidden border border-border bg-primary/5">
         <iframe
-          src={url}
+          src={embedUrl}
           title={title}
           className="h-full w-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen
         />
       </div>

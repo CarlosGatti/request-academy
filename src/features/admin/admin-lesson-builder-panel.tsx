@@ -141,7 +141,7 @@ export function AdminLessonBuilderPanel({
                 placeholder="https://player.vimeo.com/… or https://cdn.example.com/lesson.mp4"
               />
               <p className="text-xs text-muted">
-                Supports Vimeo/YouTube embed URLs or a direct MP4 link.
+                Supports YouTube/Vimeo links (watch or embed) or a direct MP4 URL.
               </p>
             </div>
           ) : null}
