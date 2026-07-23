@@ -85,7 +85,11 @@ export function WorkspaceProgramsView() {
                       className="object-cover"
                       sizes="64px"
                     />
-                  ) : null}
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] font-medium tracking-wide text-muted uppercase">
+                      Program
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -117,19 +121,36 @@ export function WorkspaceProgramsView() {
               <Link
                 key={course.id}
                 href={`/academy/${slug}/courses/${course.slug}`}
-                className="border border-border bg-surface p-4 hover:bg-sea-foam"
+                className="flex gap-3 border border-border bg-surface p-4 hover:bg-sea-foam"
               >
-                <h3 className="font-display text-base font-medium text-primary">
-                  {course.title}
-                </h3>
-                {course.summary ? (
-                  <p className="mt-2 text-sm text-muted line-clamp-2">
-                    {course.summary}
-                  </p>
-                ) : null}
-                <span className="mt-3 inline-block text-sm font-medium text-accent">
-                  View program
-                </span>
+                <div className="relative size-14 shrink-0 overflow-hidden bg-secondary sm:size-16">
+                  {course.coverImageUrl ? (
+                    <MediaImage
+                      src={course.coverImageUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] font-medium tracking-wide text-muted uppercase">
+                      Program
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-display text-base font-medium text-primary">
+                    {course.title}
+                  </h3>
+                  {course.summary ? (
+                    <p className="mt-1.5 text-sm text-muted line-clamp-2">
+                      {course.summary}
+                    </p>
+                  ) : null}
+                  <span className="mt-2 inline-block text-sm font-medium text-accent">
+                    View program
+                  </span>
+                </div>
               </Link>
             ))}
           </div>

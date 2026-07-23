@@ -42,6 +42,12 @@ enum DefinedAcademyShortLinkStatus {
   EXPIRED
 }
 
+enum DefinedAcademyCareerJourneyStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
 type DefinedAcademy {
   id: Int!
   slug: String!
@@ -169,6 +175,53 @@ type DefinedAcademyLessonProgress {
   completedAt: DateTime
 }
 
+type DefinedAcademyCareerStage {
+  id: Int!
+  journeyId: Int!
+  title: String!
+  slug: String!
+  description: String
+  summary: String
+  iconKey: String
+  sortOrder: Int!
+}
+
+type DefinedAcademyCareerJourney {
+  id: Int!
+  academyId: Int!
+  title: String!
+  slug: String!
+  description: String
+  status: DefinedAcademyCareerJourneyStatus!
+  stages: [DefinedAcademyCareerStage!]
+}
+
+type DefinedAcademyUserCareerStageCompletion {
+  id: Int!
+  stageId: Int!
+  completedAt: DateTime!
+  notes: String
+  stage: DefinedAcademyCareerStage
+}
+
+type DefinedAcademyUserCareerProfile {
+  id: Int!
+  userId: Int!
+  academyId: Int!
+  journeyId: Int!
+  currentStageId: Int
+  notes: String
+  currentStage: DefinedAcademyCareerStage
+  completions: [DefinedAcademyUserCareerStageCompletion!]
+  journey: DefinedAcademyCareerJourney
+}
+
+type DefinedAcademyCareerRecommendations {
+  stage: DefinedAcademyCareerStage
+  courses: [DefinedAcademyCourse!]!
+  resources: [DefinedAcademyResource!]!
+}
+
 type AuthUser {
   id: Int!
   email: String!
@@ -256,6 +309,13 @@ type Query {
     enrollmentId: Int!
     lessonId: Int!
   ): DefinedAcademyLessonProgress
+  definedAcademyCareerJourneyByAcademySlug(
+    academySlug: String!
+  ): DefinedAcademyCareerJourney
+  myDefinedAcademyCareerProfile(academyId: Int!): DefinedAcademyUserCareerProfile
+  myDefinedAcademyCareerRecommendations(
+    academyId: Int!
+  ): DefinedAcademyCareerRecommendations!
 }
 
 type Mutation {
@@ -285,4 +345,17 @@ type Mutation {
     enrollmentId: Int!
     lessonId: Int!
   ): DefinedAcademyLessonProgress!
+  initializeMyDefinedAcademyCareerProfile(
+    academyId: Int!
+    stageId: Int
+  ): DefinedAcademyUserCareerProfile!
+  setMyDefinedAcademyCareerStage(
+    academyId: Int!
+    stageId: Int!
+  ): DefinedAcademyUserCareerProfile!
+  completeMyDefinedAcademyCareerStage(
+    academyId: Int!
+    stageId: Int!
+    notes: String
+  ): DefinedAcademyUserCareerProfile!
 }

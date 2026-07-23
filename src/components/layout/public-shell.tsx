@@ -27,6 +27,12 @@ export function PublicHeader() {
             Programs
           </Link>
           <Link
+            href={`/academy/${academySlug}/career`}
+            className="opacity-90 hover:opacity-100"
+          >
+            Career
+          </Link>
+          <Link
             href={`/academy/${academySlug}/resources`}
             className="hidden opacity-90 hover:opacity-100 sm:inline"
           >

@@ -99,10 +99,10 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
                 Explore programs
               </Link>
               <Link
-                href={`/register?returnUrl=${encodeURIComponent(`/academy/${academySlug}`)}`}
+                href={`/academy/${academySlug}/career`}
                 className="inline-flex h-11 items-center rounded-md border border-border bg-surface px-5 text-sm font-medium text-primary hover:bg-sea-foam"
               >
-                Create account
+                Career journey
               </Link>
             </div>
           </div>

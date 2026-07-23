@@ -2,7 +2,7 @@ import { ApolloLink } from "@apollo/client";
 import { toGraphQLInt } from "@/lib/graphql/ids";
 
 const INT_VARIABLE_PATTERN =
-  /(?:^|_)(?:id|Id)$|^(?:academyId|courseId|moduleId|lessonId|enrollmentId|resourceId|partnerId|shortLinkId|campaignId|parentId)$/;
+  /(?:^|_)(?:id|Id)$|^(?:academyId|courseId|moduleId|lessonId|enrollmentId|resourceId|partnerId|shortLinkId|campaignId|parentId|stageId|journeyId|profileId)$/;
 
 export function coerceIntVariables(value: unknown): unknown {
   if (Array.isArray(value)) {

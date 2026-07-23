@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils/cn";
 
 const nav = [
   { href: "/workspace", label: "Home", exact: true },
+  { href: "/workspace/career", label: "Career" },
   { href: "/workspace/programs", label: "Programs" },
   { href: "/workspace/resources", label: "Resources" },
   { href: "/workspace/downloads", label: "Downloads" },

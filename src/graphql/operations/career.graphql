@@ -1,0 +1,124 @@
+fragment CareerStageFields on DefinedAcademyCareerStage {
+  id
+  journeyId
+  title
+  slug
+  description
+  summary
+  iconKey
+  sortOrder
+}
+
+query DefinedAcademyCareerJourneyByAcademySlug($academySlug: String!) {
+  definedAcademyCareerJourneyByAcademySlug(academySlug: $academySlug) {
+    id
+    title
+    slug
+    description
+    status
+    stages {
+      ...CareerStageFields
+    }
+  }
+}
+
+query MyDefinedAcademyCareerProfile($academyId: Int!) {
+  myDefinedAcademyCareerProfile(academyId: $academyId) {
+    id
+    userId
+    academyId
+    journeyId
+    currentStageId
+    notes
+    currentStage {
+      ...CareerStageFields
+    }
+    completions {
+      id
+      stageId
+      completedAt
+      stage {
+        ...CareerStageFields
+      }
+    }
+    journey {
+      id
+      title
+      stages {
+        ...CareerStageFields
+      }
+    }
+  }
+}
+
+query MyDefinedAcademyCareerRecommendations($academyId: Int!) {
+  myDefinedAcademyCareerRecommendations(academyId: $academyId) {
+    stage {
+      ...CareerStageFields
+    }
+    courses {
+      id
+      title
+      slug
+      summary
+      coverImageUrl
+      estimatedDurationMinutes
+    }
+    resources {
+      id
+      title
+      type
+      fileUrl
+      externalUrl
+    }
+  }
+}
+
+mutation InitializeMyDefinedAcademyCareerProfile(
+  $academyId: Int!
+  $stageId: Int
+) {
+  initializeMyDefinedAcademyCareerProfile(
+    academyId: $academyId
+    stageId: $stageId
+  ) {
+    id
+    currentStageId
+    currentStage {
+      ...CareerStageFields
+    }
+  }
+}
+
+mutation SetMyDefinedAcademyCareerStage($academyId: Int!, $stageId: Int!) {
+  setMyDefinedAcademyCareerStage(academyId: $academyId, stageId: $stageId) {
+    id
+    currentStageId
+    currentStage {
+      ...CareerStageFields
+    }
+  }
+}
+
+mutation CompleteMyDefinedAcademyCareerStage(
+  $academyId: Int!
+  $stageId: Int!
+  $notes: String
+) {
+  completeMyDefinedAcademyCareerStage(
+    academyId: $academyId
+    stageId: $stageId
+    notes: $notes
+  ) {
+    id
+    currentStageId
+    currentStage {
+      title
+      slug
+    }
+    completions {
+      stageId
+      completedAt
+    }
+  }
+}
