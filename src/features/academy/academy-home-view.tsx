@@ -9,6 +9,7 @@ import { Alert } from "@/components/ui/alert";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLoading } from "@/components/ui/page-loading";
+import { CareerHomePromo } from "@/features/academy/career/components/career-home-promo";
 import { HeroBanner } from "@/features/academy/hero-banner";
 import { ReferralCapture } from "@/features/referrals/capture";
 import {
@@ -111,6 +112,8 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
           </div>
         </Container>
       </section>
+
+      <CareerHomePromo academySlug={academySlug} />
 
       {featuredCourse ? (
         <section className="border-b border-border bg-secondary/40">

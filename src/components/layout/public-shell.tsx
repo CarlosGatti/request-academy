@@ -28,7 +28,7 @@ export function PublicHeader() {
           </Link>
           <Link
             href={`/academy/${academySlug}/career`}
-            className="opacity-90 hover:opacity-100"
+            className="rounded-md bg-accent/90 px-3 py-1.5 font-medium text-white hover:bg-accent"
           >
             Career
           </Link>
