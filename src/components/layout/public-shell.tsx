@@ -11,36 +11,36 @@ export function PublicHeader() {
   const { isAuthenticated, hasDefinedAccess } = useAuth();
 
   return (
-    <header className="border-b border-border bg-primary text-sea-foam">
-      <Container className="flex h-20 items-center justify-between gap-4 sm:h-24">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-primary/55 text-sea-foam backdrop-blur-xl supports-[backdrop-filter]:bg-primary/40">
+      <Container className="flex h-16 items-center justify-between gap-4 sm:h-[4.5rem]">
         <Link href={`/academy/${academySlug}`} className="flex shrink-0 items-center gap-3">
-          <BrandLogo priority />
-          <span className="hidden font-display text-base font-medium tracking-wide sm:inline">
+          <BrandLogo priority className="h-10 w-40 sm:h-12 sm:w-48" />
+          <span className="hidden font-display text-base font-medium tracking-wide text-sea-foam/95 sm:inline">
             Academy
           </span>
         </Link>
         <nav className="flex items-center gap-3 text-sm sm:gap-4">
           <Link
             href={`/academy/${academySlug}/courses`}
-            className="opacity-90 hover:opacity-100"
+            className="text-sea-foam/85 hover:text-sea-foam"
           >
             Programs
           </Link>
           <Link
             href={`/academy/${academySlug}/career`}
-            className="rounded-md bg-accent/90 px-3 py-1.5 font-medium text-white hover:bg-accent"
+            className="rounded-md border border-lichen/35 bg-white/5 px-3 py-1.5 font-medium text-sea-foam hover:bg-white/10"
           >
             Career
           </Link>
           <Link
             href={`/academy/${academySlug}/resources`}
-            className="hidden opacity-90 hover:opacity-100 sm:inline"
+            className="hidden text-sea-foam/85 hover:text-sea-foam sm:inline"
           >
             Resources
           </Link>
           <Link
             href={`/academy/${academySlug}/partners`}
-            className="hidden opacity-90 hover:opacity-100 md:inline"
+            className="hidden text-sea-foam/85 hover:text-sea-foam md:inline"
           >
             Partners
           </Link>
@@ -49,7 +49,7 @@ export function PublicHeader() {
               {hasDefinedAccess ? (
                 <Link
                   href="/admin"
-                  className="hidden opacity-90 hover:opacity-100 sm:inline"
+                  className="hidden text-sea-foam/85 hover:text-sea-foam sm:inline"
                 >
                   Admin
                 </Link>

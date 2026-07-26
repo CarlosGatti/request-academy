@@ -9,8 +9,8 @@ import { Alert } from "@/components/ui/alert";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLoading } from "@/components/ui/page-loading";
+import { AcademyHomeHero } from "@/features/academy/academy-home-hero";
 import { CareerHomePromo } from "@/features/academy/career/components/career-home-promo";
-import { HeroBanner } from "@/features/academy/hero-banner";
 import { ReferralCapture } from "@/features/referrals/capture";
 import {
   DefinedAcademyBySlugDocument,
@@ -18,7 +18,6 @@ import {
   DefinedPublicAcademyPartnersDocument,
 } from "@/graphql/generated/graphql";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
-import { resolveAcademyTheme } from "@/lib/tenant/theme";
 
 export function AcademyHomeView({ academySlug }: { academySlug: string }) {
   const academyQuery = useQuery(DefinedAcademyBySlugDocument, {
@@ -61,7 +60,6 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
     );
   }
 
-  const theme = resolveAcademyTheme(academy);
   const courses = coursesQuery.data?.definedAcademyPublishedCourses ?? [];
   const partners = partnersQuery.data?.definedPublicAcademyPartners ?? [];
   const featuredPartners = partners.filter((partner) => partner.featured).slice(0, 3);
@@ -73,45 +71,7 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
         <ReferralCapture academyId={academy.id} />
       </Suspense>
 
-      <section className="border-b border-border bg-surface">
-        <Container className="grid gap-8 py-12 lg:grid-cols-[0.95fr_1.15fr] lg:items-center">
-          <div className="space-y-5">
-            <p className="text-sm font-medium tracking-wide text-accent uppercase">
-              Professional growth
-            </p>
-            <h1 className="font-display text-4xl font-medium tracking-tight text-primary md:text-5xl">
-              {theme.name}
-            </h1>
-            {academy.description ? (
-              <p className="max-w-2xl text-lg leading-relaxed text-muted">
-                {academy.description}
-              </p>
-            ) : (
-              <p className="max-w-2xl text-lg leading-relaxed text-muted">
-                Practical professional knowledge and reusable materials that help
-                you perform real work.
-              </p>
-            )}
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href={`/academy/${academySlug}/courses`}
-                className="inline-flex h-11 items-center rounded-md bg-highlight px-5 text-sm font-medium text-white hover:bg-highlight/90"
-              >
-                Explore programs
-              </Link>
-              <Link
-                href={`/academy/${academySlug}/career`}
-                className="inline-flex h-11 items-center rounded-md border border-border bg-surface px-5 text-sm font-medium text-primary hover:bg-sea-foam"
-              >
-                Career journey
-              </Link>
-            </div>
-          </div>
-          <div className="w-full min-w-0">
-            <HeroBanner />
-          </div>
-        </Container>
-      </section>
+      <AcademyHomeHero academySlug={academySlug} />
 
       <CareerHomePromo academySlug={academySlug} />
 
