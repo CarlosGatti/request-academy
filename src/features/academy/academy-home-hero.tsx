@@ -4,8 +4,8 @@ import { buttonClassName } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils/cn";
 
-/** Workspace crop from the brand hero asset — used as product visual, not full-bleed dark BG. */
-const HERO_PRODUCT_VISUAL = "/bg-request.png";
+/** Composited product visual: real login screenshot on a light workspace laptop. */
+const HERO_PRODUCT_VISUAL = "/images/re-quest-academy-hero-product.png";
 
 type AcademyHomeHeroProps = {
   academySlug: string;
@@ -73,22 +73,17 @@ export function AcademyHomeHero({
             "motion-safe:animate-[hero-fade-up_0.65s_ease-out_0.1s_both]",
           )}
         >
-          <div className="relative overflow-hidden rounded-xl bg-primary shadow-lg ring-1 ring-primary/10">
+          <div className="relative overflow-hidden rounded-xl bg-surface shadow-lg ring-1 ring-border/70">
             <div className="relative aspect-[4/3] sm:aspect-[5/4] lg:aspect-[4/3]">
               <Image
                 src={HERO_PRODUCT_VISUAL}
-                alt="RE-Quest Academy workspace on a laptop, with career progress and learning resources"
+                alt="Laptop showing the RE-Quest Academy sign-in page"
                 fill
                 priority
                 sizes="(max-width: 1024px) 90vw, 42vw"
-                className="object-cover object-[78%_42%]"
+                className="object-cover object-center"
               />
             </div>
-            {/* Soft edge blend so the crop feels editorial, not cinematic */}
-            <div
-              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-primary/25 via-transparent to-transparent"
-              aria-hidden
-            />
           </div>
 
           {/* Small floating product cue — restrained, not a badge cluster */}
