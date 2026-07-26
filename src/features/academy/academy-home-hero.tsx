@@ -1,11 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { buttonClassName } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { HeroLoginPreview } from "@/features/academy/hero-login-preview";
 import { cn } from "@/lib/utils/cn";
-
-/** Composited product visual: real login screenshot on a light workspace laptop. */
-const HERO_PRODUCT_VISUAL = "/images/re-quest-academy-hero-product.png";
 
 type AcademyHomeHeroProps = {
   academySlug: string;
@@ -13,8 +10,7 @@ type AcademyHomeHeroProps = {
 };
 
 /**
- * Light editorial hero: brand-led copy on the left, product/workspace visual on the right.
- * Career Journey lives in the dedicated section below — not a tiny timeline here.
+ * Light editorial hero: brand-led copy on the left, crisp Sign in product preview on the right.
  */
 export function AcademyHomeHero({
   academySlug,
@@ -27,9 +23,8 @@ export function AcademyHomeHero({
         className,
       )}
     >
-      {/* Soft brand atmosphere — not a dark full-bleed photo */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(196,217,212,0.55),transparent_55%),radial-gradient(ellipse_at_bottom_left,rgba(240,245,252,1),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(196,217,212,0.45),transparent_55%),radial-gradient(ellipse_at_bottom_left,rgb(240,245,252),transparent_50%)]"
         aria-hidden
       />
 
@@ -69,41 +64,14 @@ export function AcademyHomeHero({
 
         <div
           className={cn(
-            "relative mx-auto w-full max-w-xl lg:mx-0 lg:max-w-none",
+            "mx-auto w-full max-w-md lg:mx-0 lg:max-w-none",
             "motion-safe:animate-[hero-fade-up_0.65s_ease-out_0.1s_both]",
           )}
         >
-          <div className="relative overflow-hidden rounded-xl bg-surface shadow-lg ring-1 ring-border/70">
-            <div className="relative aspect-[4/3] sm:aspect-[5/4] lg:aspect-[4/3]">
-              <Image
-                src={HERO_PRODUCT_VISUAL}
-                alt="Laptop showing the RE-Quest Academy sign-in page"
-                fill
-                priority
-                sizes="(max-width: 1024px) 90vw, 42vw"
-                className="object-cover object-center"
-              />
-            </div>
-          </div>
-
-          {/* Small floating product cue — restrained, not a badge cluster */}
-          <div className="absolute -bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:w-56">
-            <div className="rounded-lg border border-border/80 bg-surface/95 px-4 py-3 shadow-md backdrop-blur-sm">
-              <p className="text-[11px] font-medium tracking-wide text-muted uppercase">
-                Career progress
-              </p>
-              <p className="mt-1 text-sm font-medium text-primary">
-                Know where you are — and what comes next
-              </p>
-              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-lichen">
-                <div className="h-full w-[62%] rounded-full bg-accent" />
-              </div>
-            </div>
-          </div>
+          <HeroLoginPreview />
         </div>
       </Container>
 
-      {/* Space for overlapping value strip */}
       <div className="h-8 sm:h-10" aria-hidden />
     </section>
   );
