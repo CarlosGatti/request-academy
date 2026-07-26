@@ -1,4 +1,5 @@
 import { MediaImage } from "@/components/ui/media-image";
+import { buttonClassName } from "@/components/ui/button";
 import Link from "next/link";
 import { formatDurationMinutes } from "@/lib/academy/labels";
 import { cn } from "@/lib/utils/cn";
@@ -24,35 +25,36 @@ export function CourseCard({
   className?: string;
 }) {
   const duration = formatDurationMinutes(course.estimatedDurationMinutes);
+  const href = `/academy/${academySlug}/courses/${course.slug}`;
 
   return (
     <article
       className={cn(
-        "flex flex-col overflow-hidden border border-border bg-surface",
+        "group flex flex-col overflow-hidden rounded-xl bg-surface shadow-card ring-1 ring-border/70 transition-shadow hover:shadow-lg focus-within:ring-2 focus-within:ring-accent/40",
         className,
       )}
     >
-      <div className="relative aspect-[16/9] bg-secondary">
+      <Link href={href} className="relative block aspect-[16/10] bg-sea-foam">
         {course.coverImageUrl ? (
           <MediaImage
             src={course.coverImageUrl}
             alt=""
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]"
             sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-lichen/40 text-sm text-muted">
+          <div className="flex h-full items-center justify-center bg-lichen/35 text-sm text-muted">
             Program
           </div>
         )}
-      </div>
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      </Link>
+      <div className="flex flex-1 flex-col gap-4 p-6">
         <div className="space-y-2">
           <h3 className="font-display text-xl font-medium text-primary">
             <Link
-              href={`/academy/${academySlug}/courses/${course.slug}`}
-              className="hover:underline"
+              href={href}
+              className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {course.title}
             </Link>
@@ -64,22 +66,23 @@ export function CourseCard({
           ) : null}
         </div>
         <div className="mt-auto flex flex-wrap items-center gap-2 text-xs text-muted">
-          {duration ? <span>{duration}</span> : null}
+          {duration ? (
+            <span className="rounded-md bg-sea-foam px-2.5 py-1 font-medium text-primary">
+              {duration}
+            </span>
+          ) : null}
           {course.moduleCount != null ? (
             <span>
               {course.moduleCount} module{course.moduleCount === 1 ? "" : "s"}
             </span>
           ) : null}
           {course.visibility === "AUTHENTICATED" ? (
-            <span className="inline-flex items-center rounded-sm bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
+            <span className="inline-flex items-center rounded-md bg-accent/15 px-2.5 py-1 text-xs font-medium text-accent">
               Members
             </span>
           ) : null}
         </div>
-        <Link
-          href={`/academy/${academySlug}/courses/${course.slug}`}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-sea-foam hover:bg-primary/90"
-        >
+        <Link href={href} className={buttonClassName({ variant: "primary", size: "lg" })}>
           View program
         </Link>
       </div>

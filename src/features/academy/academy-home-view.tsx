@@ -4,13 +4,18 @@ import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { CourseCard } from "@/components/courses/course-card";
-import { PartnerCard } from "@/components/partners/partner-card";
 import { Alert } from "@/components/ui/alert";
+import { buttonClassName } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLoading } from "@/components/ui/page-loading";
 import { AcademyHomeHero } from "@/features/academy/academy-home-hero";
 import { CareerHomePromo } from "@/features/academy/career/components/career-home-promo";
+import { HomeFeaturedProgram } from "@/features/academy/home-featured-program";
+import { HomePartnersSection } from "@/features/academy/home-partners-section";
+import { HomePracticalOutcomes } from "@/features/academy/home-practical-outcomes";
+import { HomeResourcesPreview } from "@/features/academy/home-resources-preview";
+import { HomeValueStrip } from "@/features/academy/home-value-strip";
 import { ReferralCapture } from "@/features/referrals/capture";
 import {
   DefinedAcademyBySlugDocument,
@@ -62,8 +67,15 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
 
   const courses = coursesQuery.data?.definedAcademyPublishedCourses ?? [];
   const partners = partnersQuery.data?.definedPublicAcademyPartners ?? [];
-  const featuredPartners = partners.filter((partner) => partner.featured).slice(0, 3);
+  const featuredPartners = partners.filter((partner) => partner.featured);
+  const partnerList = (
+    featuredPartners.length ? featuredPartners : partners
+  ).slice(0, 3);
   const featuredCourse = courses[0];
+  /** Avoid repeating the featured program in the catalog grid. */
+  const gridCourses = featuredCourse
+    ? courses.filter((course) => course.id !== featuredCourse.id).slice(0, 6)
+    : courses.slice(0, 6);
 
   return (
     <>
@@ -72,105 +84,47 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
       </Suspense>
 
       <AcademyHomeHero academySlug={academySlug} />
-
+      <HomeValueStrip />
       <CareerHomePromo academySlug={academySlug} />
 
       {featuredCourse ? (
-        <section className="border-b border-border bg-secondary/40">
-          <Container className="grid gap-8 py-12 lg:grid-cols-2 lg:items-center">
-            <div className="space-y-4">
-              <p className="text-sm font-medium text-accent uppercase tracking-wide">
-                Featured pathway
-              </p>
-              <h2 className="font-display text-3xl font-medium text-primary">
-                {featuredCourse.title}
-              </h2>
-              {featuredCourse.summary ? (
-                <p className="text-muted leading-relaxed">{featuredCourse.summary}</p>
-              ) : null}
-              <Link
-                href={`/academy/${academySlug}/courses/${featuredCourse.slug}`}
-                className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-sea-foam"
-              >
-                View program
-              </Link>
-            </div>
-            <CourseCard academySlug={academySlug} course={featuredCourse} />
-          </Container>
-        </section>
+        <HomeFeaturedProgram academySlug={academySlug} course={featuredCourse} />
       ) : null}
 
-      <section>
-        <Container className="space-y-6 py-12">
-          <div className="space-y-2">
-            <h2 className="font-display text-2xl font-medium text-primary">
-              Practical outcomes
-            </h2>
-            <p className="max-w-2xl text-muted">
-              Templates, checklists, guides, and downloadable materials sit
-              alongside structured programs—built for daily professional work.
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              {
-                title: "Reusable materials",
-                body: "Download templates and checklists you can apply immediately.",
-              },
-              {
-                title: "Structured guidance",
-                body: "Clear development paths without classroom theatrics.",
-              },
-              {
-                title: "Professional network",
-                body: "Partners and specialists ready to support your growth.",
-              },
-            ].map((item) => (
-              <div key={item.title} className="border border-border bg-surface p-5">
-                <h3 className="font-display text-lg font-medium text-primary">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted">{item.body}</p>
-              </div>
-            ))}
-          </div>
-          <Link
-            href={`/academy/${academySlug}/resources`}
-            className="inline-flex text-sm font-medium text-accent hover:underline"
-          >
-            Browse practical materials
-          </Link>
-        </Container>
-      </section>
+      <HomePracticalOutcomes academySlug={academySlug} />
 
-      <section className="border-t border-border bg-surface">
-        <Container className="space-y-6 py-12">
-          <div className="flex items-end justify-between gap-4">
-            <div className="space-y-2">
-              <h2 className="font-display text-2xl font-medium text-primary">
+      <section className="bg-sea-foam/40">
+        <Container className="space-y-10 py-section-mobile sm:py-section-tablet lg:py-section-desktop">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <h2 className="font-display text-3xl font-medium tracking-tight text-primary md:text-4xl">
                 Available programs
               </h2>
-              <p className="text-muted">
+              <p className="text-lg leading-relaxed text-muted">
                 Professional development pathways you can put to work.
               </p>
             </div>
             <Link
               href={`/academy/${academySlug}/courses`}
-              className="hidden text-sm font-medium text-accent hover:underline sm:inline"
+              className="inline-flex text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               View all
             </Link>
           </div>
           {coursesQuery.loading && !courses.length ? (
             <PageLoading rows={2} />
-          ) : courses.length === 0 ? (
+          ) : gridCourses.length === 0 && !featuredCourse ? (
             <EmptyState
               title="No programs published yet"
               description="Check back soon for new professional development pathways."
             />
+          ) : gridCourses.length === 0 ? (
+            <p className="text-sm text-muted">
+              More programs will appear here as they are published.
+            </p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {courses.slice(0, 6).map((course) => (
+              {gridCourses.map((course) => (
                 <CourseCard
                   key={course.id}
                   academySlug={academySlug}
@@ -182,58 +136,38 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
         </Container>
       </section>
 
-      {(featuredPartners.length > 0 || partners.length > 0) && (
-        <section className="border-t border-border">
-          <Container className="space-y-6 py-12">
-            <div className="space-y-2">
-              <h2 className="font-display text-2xl font-medium text-primary">
-                Professional partners
-              </h2>
-              <p className="text-muted">
-                A support network for real-world work.
-              </p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              {(featuredPartners.length ? featuredPartners : partners.slice(0, 3)).map(
-                (partner) => (
-                  <PartnerCard
-                    key={partner.id}
-                    academySlug={academySlug}
-                    partner={partner}
-                  />
-                ),
-              )}
-            </div>
-            <Link
-              href={`/academy/${academySlug}/partners`}
-              className="inline-flex text-sm font-medium text-accent hover:underline"
-            >
-              View partners
-            </Link>
-          </Container>
-        </section>
-      )}
+      <HomeResourcesPreview academySlug={academySlug} />
 
-      <section className="border-t border-border bg-primary text-sea-foam">
-        <Container className="flex flex-col gap-4 py-12 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <h2 className="font-display text-2xl font-medium">Ready to begin?</h2>
-            <p className="text-sea-foam/80">
-              Sign in to enroll and access your professional workspace.
+      <HomePartnersSection academySlug={academySlug} partners={partnerList} />
+
+      {/* Social proof: omitted until real testimonials/metrics exist. */}
+
+      <section className="bg-primary text-sea-foam">
+        <Container className="flex flex-col gap-6 py-section-mobile sm:flex-row sm:items-center sm:justify-between sm:py-section-tablet lg:py-section-desktop">
+          <div className="max-w-xl space-y-3">
+            <h2 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
+              Ready to take your next step?
+            </h2>
+            <p className="text-lg leading-relaxed text-sea-foam/85">
+              Explore programs, resources, and guidance built around your real
+              estate career.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/login"
-              className="inline-flex h-10 items-center rounded-md bg-highlight px-4 text-sm font-medium text-white"
+              href={`/academy/${academySlug}/courses`}
+              className={buttonClassName({ variant: "highlight", size: "xl" })}
             >
-              Sign in
+              Explore programs
             </Link>
             <Link
-              href="/workspace"
-              className="inline-flex h-10 items-center rounded-md border border-sea-foam/30 px-4 text-sm font-medium"
+              href="/login"
+              className={buttonClassName({
+                variant: "outline-on-dark",
+                size: "xl",
+              })}
             >
-              Open workspace
+              Sign in
             </Link>
           </div>
         </Container>

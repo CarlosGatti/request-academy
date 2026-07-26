@@ -1,9 +1,10 @@
-export { Button } from "./button";
+export { Button, buttonClassName } from "./button";
 export { Input } from "./input";
 export { Label } from "./label";
 export { Spinner } from "./spinner";
 export { Alert } from "./alert";
 export { Container } from "./container";
+export { Surface } from "./surface";
 export { PageHeader } from "./page-header";
 export { EmptyState } from "./empty-state";
 export { Skeleton } from "./skeleton";

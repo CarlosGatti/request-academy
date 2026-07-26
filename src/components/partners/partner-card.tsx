@@ -21,22 +21,24 @@ export function PartnerCard({
   partner: PartnerCardData;
   className?: string;
 }) {
+  const href = `/academy/${academySlug}/partners/${partner.slug}`;
+
   return (
     <article
       className={cn(
-        "flex flex-col gap-4 border border-border bg-surface p-5",
-        partner.featured && "border-accent/40 bg-secondary/40",
+        "flex flex-col gap-4 rounded-xl bg-surface p-6 shadow-card ring-1 ring-border/70 transition-shadow hover:shadow-lg",
+        partner.featured && "bg-sea-foam/80 ring-accent/25",
         className,
       )}
     >
       <div className="flex items-start gap-4">
-        <div className="relative size-14 shrink-0 overflow-hidden border border-border bg-sea-foam">
+        <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-sea-foam ring-1 ring-border/70">
           {partner.logoUrl ? (
             <MediaImage
               src={partner.logoUrl}
               alt=""
               fill
-              className="object-contain p-1"
+              className="object-contain p-1.5"
               sizes="56px"
             />
           ) : (
@@ -48,8 +50,8 @@ export function PartnerCard({
         <div className="min-w-0 space-y-1">
           <h3 className="font-display text-lg font-medium text-primary">
             <Link
-              href={`/academy/${academySlug}/partners/${partner.slug}`}
-              className="hover:underline"
+              href={href}
+              className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {partner.name}
             </Link>
@@ -69,8 +71,8 @@ export function PartnerCard({
         </p>
       ) : null}
       <Link
-        href={`/academy/${academySlug}/partners/${partner.slug}`}
-        className="text-sm font-medium text-accent hover:underline"
+        href={href}
+        className="mt-auto text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         View partner
       </Link>

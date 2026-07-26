@@ -1,14 +1,17 @@
 import { cn } from "@/lib/utils/cn";
 import type { HTMLAttributes } from "react";
 
-export function Container({
+/**
+ * Soft product/marketing surface — prefer this over thin-border rectangles.
+ */
+export function Surface({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8",
+        "rounded-xl bg-surface shadow-card ring-1 ring-border/70",
         className,
       )}
       {...props}

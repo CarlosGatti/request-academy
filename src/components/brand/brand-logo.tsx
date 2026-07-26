@@ -1,16 +1,25 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
+const LOGO_SRC = {
+  white: "/brand/re-quest/logo-white.png",
+  navy: "/brand/re-quest/logo-navy.png",
+} as const;
+
 /**
- * RE-Quest wordmark. logo-white.png has large transparent padding,
- * so we scale it inside a clipped frame to fill the navbar height.
+ * RE-Quest wordmark. Source files include large transparent padding,
+ * so we scale inside a clipped frame to fill the navbar height.
+ * Do not stretch, recolor, or add effects to the logo.
  */
 export function BrandLogo({
   className,
   priority,
+  variant = "white",
 }: {
   className?: string;
   priority?: boolean;
+  /** Use navy on light surfaces; white on dark chrome. */
+  variant?: keyof typeof LOGO_SRC;
 }) {
   return (
     <span
@@ -20,7 +29,7 @@ export function BrandLogo({
       )}
     >
       <Image
-        src="/brand/re-quest/logo-white.png"
+        src={LOGO_SRC[variant]}
         alt="RE-Quest"
         width={2917}
         height={2084}
