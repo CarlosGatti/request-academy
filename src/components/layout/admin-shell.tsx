@@ -19,6 +19,7 @@ import { PublicFooter } from "@/components/layout/public-shell";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Select } from "@/components/ui/select";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import {
   AdminAcademyProvider,
   useAdminAcademy,
@@ -243,7 +244,21 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
         >
           Workspace
         </Link>
-        <ChromeUserLabel>{displayName}</ChromeUserLabel>
+        <Link
+          href="/workspace/settings"
+          className="flex min-w-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-foam"
+          aria-label="Profile settings"
+        >
+          <UserAvatar
+            profilePicture={user?.profilePicture}
+            firstName={user?.firstName}
+            lastName={user?.lastName}
+            email={user?.email}
+            size={32}
+            className="bg-sea-foam/20 text-sea-foam ring-1 ring-sea-foam/30"
+          />
+          <ChromeUserLabel>{displayName}</ChromeUserLabel>
+        </Link>
         <ChromeSignOutButton
           onClick={() => {
             clearSession();

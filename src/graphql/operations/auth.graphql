@@ -6,6 +6,7 @@ mutation Login($user: LoginUserInput!) {
       email
       firstName
       lastName
+      profilePicture
       isAdmin
       apps
     }
@@ -24,8 +25,32 @@ mutation Register($user: RegisterUserInput!, $appCode: String) {
       email
       firstName
       lastName
+      profilePicture
       apps
     }
+  }
+}
+
+query Me {
+  me {
+    id
+    email
+    firstName
+    lastName
+    profilePicture
+    apps
+    isAdmin
+  }
+}
+
+mutation UpdateUser($data: UpdateUserInput!) {
+  updateUser(data: $data) {
+    id
+    email
+    firstName
+    lastName
+    profilePicture
+    isAdmin
   }
 }
 

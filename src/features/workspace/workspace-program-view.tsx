@@ -23,6 +23,7 @@ import {
   getGraphQLErrorMessage,
   isAlreadyEnrolledError,
 } from "@/lib/graphql/errors";
+import { toInt } from "@/lib/graphql/ids";
 
 export function WorkspaceProgramView({ courseSlug }: { courseSlug: string }) {
   const { slug, academyId } = useDefaultAcademy();
@@ -32,8 +33,8 @@ export function WorkspaceProgramView({ courseSlug }: { courseSlug: string }) {
     variables: { academySlug: slug, courseSlug },
   });
   const enrollmentsQuery = useQuery(MyDefinedAcademyEnrollmentsDocument, {
-    variables: { academyId },
-    skip: !academyId,
+    variables: { academyId: academyId ?? undefined },
+    skip: academyId == null,
   });
 
   const course = courseQuery.data?.definedAcademyCourseBySlug;
@@ -66,7 +67,9 @@ export function WorkspaceProgramView({ courseSlug }: { courseSlug: string }) {
     if (!course) return;
     setEnrollError(null);
     try {
-      const result = await enroll({ variables: { courseId: course.id } });
+      const result = await enroll({
+        variables: { courseId: toInt(course.id, "courseId") },
+      });
       if (result.data?.enrollInDefinedAcademyCourse || isAlreadyEnrolledError(result.error)) {
         await enrollmentsQuery.refetch();
         await progressQuery.refetch();

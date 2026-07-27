@@ -19,11 +19,13 @@ import {
   MyDefinedAcademyEnrollmentsDocument,
 } from "@/graphql/generated/graphql";
 import { formatDurationMinutes, formatDurationSeconds } from "@/lib/academy/labels";
+import { resolveMediaUrl } from "@/lib/academy/resolve-media-url";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import {
   getGraphQLErrorMessage,
   isAlreadyEnrolledError,
 } from "@/lib/graphql/errors";
+import { toGraphQLInt, toInt } from "@/lib/graphql/ids";
 import { Lock } from "lucide-react";
 
 export function CourseDetailView({
@@ -43,10 +45,10 @@ export function CourseDetailView({
   const courseQuery = useQuery(DefinedAcademyCourseBySlugDocument, {
     variables: { academySlug, courseSlug },
   });
-  const academyId = academyQuery.data?.definedAcademyBySlug?.id;
+  const academyId = toGraphQLInt(academyQuery.data?.definedAcademyBySlug?.id);
   const enrollmentsQuery = useQuery(MyDefinedAcademyEnrollmentsDocument, {
-    variables: { academyId },
-    skip: !isAuthenticated || !academyId,
+    variables: { academyId: academyId ?? undefined },
+    skip: !isAuthenticated || academyId == null,
   });
 
   const [enroll, { loading: enrolling }] = useMutation(
@@ -88,7 +90,7 @@ export function CourseDetailView({
     setEnrollError(null);
     try {
       const result = await enroll({
-        variables: { courseId: course.id },
+        variables: { courseId: toInt(course.id, "courseId") },
       });
       if (result.data?.enrollInDefinedAcademyCourse) {
         await enrollmentsQuery.refetch();
@@ -205,7 +207,7 @@ export function CourseDetailView({
         <div className="relative aspect-[4/3] overflow-hidden border border-border bg-secondary">
           {course.coverImageUrl ? (
             <MediaImage
-              src={course.coverImageUrl}
+              src={resolveMediaUrl(course.coverImageUrl) ?? course.coverImageUrl}
               alt=""
               fill
               className="object-cover"

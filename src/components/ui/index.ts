@@ -21,3 +21,4 @@ export { ErrorState } from "./error-state";
 export { ProgramCard } from "./program-card";
 export { ResourceCard } from "./resource-card";
 export { FileUpload } from "./file-upload";
+export { UserAvatar } from "./user-avatar";

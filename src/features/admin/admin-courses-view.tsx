@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/ui/page-header";
@@ -18,8 +19,9 @@ import {
   DefinedAcademyCoursesAdminDocument,
   PublishDefinedAcademyCourseDocument,
 } from "@/graphql/generated/graphql";
+import { uploadProgramCover } from "@/lib/academy/uploads";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
-import { requireGraphQLInt } from "@/lib/graphql/ids";
+import { requireGraphQLInt, toInt } from "@/lib/graphql/ids";
 
 function slugify(value: string) {
   return value
@@ -44,6 +46,8 @@ export function AdminCoursesView() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
   const [pendingArchiveId, setPendingArchiveId] = useState<number | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   const coursesQuery = useQuery(DefinedAcademyCoursesAdminDocument, {
     variables: { academyId: academyId ?? 0 },
@@ -88,13 +92,20 @@ export function AdminCoursesView() {
     });
   }, [coursesQuery.data?.definedAcademyCourses, search, sortKey, statusFilter]);
 
+  const clearCoverSelection = () => {
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    setCoverFile(null);
+    setCoverPreview(null);
+  };
+
   const onCreate = async () => {
     if (!academyId) return;
     setFormError(null);
     try {
-      await createCourse({
+      const academyIdInt = requireGraphQLInt(academyId, "academyId");
+      const result = await createCourse({
         variables: {
-          academyId: requireGraphQLInt(academyId, "academyId"),
+          academyId: academyIdInt,
           input: {
             title,
             slug: slug || slugify(title),
@@ -103,9 +114,21 @@ export function AdminCoursesView() {
           },
         },
       });
+      const createdId = toInt(
+        result.data?.createDefinedAcademyCourse?.id,
+        "courseId",
+      );
+      if (coverFile) {
+        await uploadProgramCover({
+          file: coverFile,
+          academyId: academyIdInt,
+          courseId: createdId,
+        });
+      }
       setTitle("");
       setSlug("");
       setSummary("");
+      clearCoverSelection();
       setShowForm(false);
       await coursesQuery.refetch();
     } catch (err) {
@@ -182,6 +205,38 @@ export function AdminCoursesView() {
               <option value="AUTHENTICATED">Authenticated</option>
               <option value="PRIVATE">Private</option>
             </Select>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Cover image (optional)</Label>
+            <FileUploadButton
+              accept="image/jpeg,image/png,image/webp"
+              label={coverFile ? "Replace cover" : "Choose cover"}
+              hint="JPEG/PNG/WebP · max 8MB. Uploaded after the program is created."
+              onFile={(file) => {
+                if (coverPreview) URL.revokeObjectURL(coverPreview);
+                setCoverFile(file);
+                setCoverPreview(URL.createObjectURL(file));
+              }}
+            />
+            {coverPreview ? (
+              <div className="relative mt-2 aspect-[16/9] w-full max-w-xs overflow-hidden rounded-lg bg-secondary ring-1 ring-border/70">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverPreview}
+                  alt="Cover preview"
+                  className="h-full w-full object-cover"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="absolute top-2 right-2 bg-surface/90"
+                  onClick={clearCoverSelection}
+                >
+                  Remove
+                </Button>
+              </div>
+            ) : null}
           </div>
           <Button disabled={creating || !title} onClick={() => void onCreate()}>
             {creating ? "Creating…" : "Create program"}
@@ -277,13 +332,17 @@ export function AdminCoursesView() {
                     summary: course.summary,
                     status: course.status,
                     visibility: course.visibility,
+                    coverImageUrl: course.coverImageUrl,
                     moduleCount,
                     lessonCount,
                     publishedAt: course.publishedAt,
                   }}
                   onPublish={() =>
                     void publishCourse({
-                      variables: { academyId, courseId: course.id },
+                      variables: {
+                        academyId: requireGraphQLInt(academyId, "academyId"),
+                        courseId: requireGraphQLInt(course.id, "courseId"),
+                      },
                     }).then(() => coursesQuery.refetch())
                   }
                   onArchive={() => setPendingArchiveId(course.id)}
@@ -314,7 +373,16 @@ export function AdminCoursesView() {
                         variant="outline"
                         onClick={() =>
                           void archiveCourse({
-                            variables: { academyId, courseId: course.id },
+                            variables: {
+                              academyId: requireGraphQLInt(
+                                academyId,
+                                "academyId",
+                              ),
+                              courseId: requireGraphQLInt(
+                                course.id,
+                                "courseId",
+                              ),
+                            },
                           }).then(async () => {
                             setPendingArchiveId(null);
                             await coursesQuery.refetch();

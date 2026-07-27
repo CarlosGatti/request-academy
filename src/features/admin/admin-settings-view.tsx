@@ -17,7 +17,9 @@ import {
   UpdateDefinedAcademyDocument,
 } from "@/graphql/generated/graphql";
 import { uploadAcademyLogo } from "@/lib/academy/uploads";
+import { resolveMediaUrl } from "@/lib/academy/resolve-media-url";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
+import { requireGraphQLInt } from "@/lib/graphql/ids";
 import { reQuestTheme } from "@/lib/tenant/theme";
 
 function readColors(settings: unknown) {
@@ -109,7 +111,7 @@ function AcademySettingsForm({
             <div className="relative mt-2 h-16 w-48 overflow-hidden border border-border bg-primary p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={logoUrl}
+                src={resolveMediaUrl(logoUrl) ?? logoUrl}
                 alt="Logo preview"
                 className="h-full w-full object-contain"
               />
@@ -151,7 +153,7 @@ function AcademySettingsForm({
           setError(null);
           void updateAcademy({
             variables: {
-              id: academyId,
+              id: requireGraphQLInt(academyId, "academyId"),
               input: {
                 name,
                 description: description || undefined,

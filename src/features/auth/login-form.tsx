@@ -53,6 +53,7 @@ export function LoginForm() {
         email: payload.user.email,
         firstName: payload.user.firstName,
         lastName: payload.user.lastName,
+        profilePicture: payload.user.profilePicture ?? null,
         isAdmin: payload.user.isAdmin ?? false,
         apps: payload.user.apps ?? [],
       });

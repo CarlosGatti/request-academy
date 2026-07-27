@@ -9,6 +9,7 @@ import {
   ChromeUserLabel,
 } from "@/components/layout/app-chrome-header";
 import { Container } from "@/components/ui/container";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { cn } from "@/lib/utils/cn";
 
@@ -19,6 +20,7 @@ const nav = [
   { href: "/workspace/resources", label: "Resources" },
   { href: "/workspace/downloads", label: "Downloads" },
   { href: "/workspace/partners", label: "Network" },
+  { href: "/workspace/settings", label: "Profile" },
 ] as const;
 
 function isActive(pathname: string, href: string, exact?: boolean) {
@@ -90,7 +92,21 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
           </Link>
         }
       >
-        <ChromeUserLabel>{user?.firstName ?? user?.email}</ChromeUserLabel>
+        <Link
+          href="/workspace/settings"
+          className="flex min-w-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-foam"
+          aria-label="Profile settings"
+        >
+          <UserAvatar
+            profilePicture={user?.profilePicture}
+            firstName={user?.firstName}
+            lastName={user?.lastName}
+            email={user?.email}
+            size={32}
+            className="bg-sea-foam/20 text-sea-foam ring-1 ring-sea-foam/30"
+          />
+          <ChromeUserLabel>{user?.firstName ?? user?.email}</ChromeUserLabel>
+        </Link>
         <ChromeSignOutButton
           onClick={() => {
             clearSession();

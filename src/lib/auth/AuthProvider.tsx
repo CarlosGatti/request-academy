@@ -20,6 +20,7 @@ export type AuthUser = {
   email: string;
   firstName?: string | null;
   lastName?: string | null;
+  profilePicture?: string | null;
   isAdmin?: boolean;
   apps: string[];
 };

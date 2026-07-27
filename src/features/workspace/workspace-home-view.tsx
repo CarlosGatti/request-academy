@@ -33,8 +33,8 @@ export function WorkspaceHomeView() {
     useDefaultAcademy();
 
   const enrollmentsQuery = useQuery(MyDefinedAcademyEnrollmentsDocument, {
-    variables: { academyId },
-    skip: !academyId,
+    variables: { academyId: academyId ?? undefined },
+    skip: academyId == null,
   });
   const coursesQuery = useQuery(DefinedAcademyPublishedCoursesDocument, {
     variables: { academySlug: slug },

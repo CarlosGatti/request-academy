@@ -72,8 +72,8 @@ function WorkspaceLessonSession({
     variables: { academySlug: slug, courseSlug, lessonSlug },
   });
   const enrollmentsQuery = useQuery(MyDefinedAcademyEnrollmentsDocument, {
-    variables: { academyId },
-    skip: !academyId,
+    variables: { academyId: academyId ?? undefined },
+    skip: academyId == null,
   });
 
   const course = courseQuery.data?.definedAcademyCourseBySlug;

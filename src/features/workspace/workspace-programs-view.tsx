@@ -19,8 +19,8 @@ import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
 export function WorkspaceProgramsView() {
   const { slug, academyId, loading: academyLoading } = useDefaultAcademy();
   const enrollmentsQuery = useQuery(MyDefinedAcademyEnrollmentsDocument, {
-    variables: { academyId },
-    skip: !academyId,
+    variables: { academyId: academyId ?? undefined },
+    skip: academyId == null,
   });
   const coursesQuery = useQuery(DefinedAcademyPublishedCoursesDocument, {
     variables: { academySlug: slug },

@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import { AdminCourseDetailView } from "@/features/admin/admin-course-detail-view";
+import { toInt } from "@/lib/graphql/ids";
 
 export default function AdminCourseDetailPage({
   params,
@@ -9,5 +10,5 @@ export default function AdminCourseDetailPage({
   params: Promise<{ courseId: string }>;
 }) {
   const { courseId } = use(params);
-  return <AdminCourseDetailView courseId={Number(courseId)} />;
+  return <AdminCourseDetailView courseId={toInt(courseId, "courseId")} />;
 }

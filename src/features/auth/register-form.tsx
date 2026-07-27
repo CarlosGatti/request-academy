@@ -74,6 +74,7 @@ export function RegisterForm() {
           email: payload.user.email,
           firstName: payload.user.firstName,
           lastName: payload.user.lastName,
+          profilePicture: payload.user.profilePicture ?? null,
           apps: payload.user.apps ?? [],
         });
         void attachStoredReferral((options) => attachReferral(options));

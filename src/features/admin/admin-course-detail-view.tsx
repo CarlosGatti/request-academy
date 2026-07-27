@@ -27,7 +27,9 @@ import {
   UpdateDefinedAcademyLessonDocument,
 } from "@/graphql/generated/graphql";
 import { uploadProgramCover } from "@/lib/academy/uploads";
+import { resolveMediaUrl } from "@/lib/academy/resolve-media-url";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
+import { requireGraphQLInt } from "@/lib/graphql/ids";
 
 function slugify(value: string) {
   return value
@@ -156,7 +158,7 @@ function CourseEditForm({
               <div className="relative aspect-[16/9] w-full max-w-xs overflow-hidden border border-border bg-secondary">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={coverImageUrl}
+                  src={resolveMediaUrl(coverImageUrl) ?? coverImageUrl}
                   alt="Cover preview"
                   className="h-full w-full object-cover"
                 />
@@ -186,8 +188,8 @@ function CourseEditForm({
           setError(null);
           void updateCourse({
             variables: {
-              academyId,
-              courseId,
+              academyId: requireGraphQLInt(academyId, "academyId"),
+              courseId: requireGraphQLInt(courseId, "courseId"),
               input: {
                 title,
                 summary: summary || undefined,

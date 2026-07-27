@@ -227,8 +227,17 @@ type AuthUser {
   email: String!
   firstName: String
   lastName: String
+  profilePicture: String
   isAdmin: Boolean
   apps: [String!]!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  nickname: String
+  profilePicture: String
+  about: String
 }
 
 type LoginResult {
@@ -316,6 +325,7 @@ type Query {
   myDefinedAcademyCareerRecommendations(
     academyId: Int!
   ): DefinedAcademyCareerRecommendations!
+  me: AuthUser!
 }
 
 type Mutation {
@@ -358,4 +368,5 @@ type Mutation {
     stageId: Int!
     notes: String
   ): DefinedAcademyUserCareerProfile!
+  updateUser(data: UpdateUserInput!): AuthUser!
 }
