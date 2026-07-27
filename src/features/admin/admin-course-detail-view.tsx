@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -90,7 +89,7 @@ function CourseEditForm({
   );
 
   return (
-    <section className="space-y-4 border border-border bg-surface p-5">
+    <section className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-border/70">
       <h2 className="font-display text-lg font-medium text-primary">
         Edit program
       </h2>
@@ -274,16 +273,15 @@ export function AdminCourseDetailView({ courseId }: { courseId: number }) {
   return (
     <div className="space-y-8">
       <div className="space-y-3">
-        <Link
-          href="/admin/courses"
-          className="text-sm font-medium text-accent hover:underline"
-        >
-          Back to programs
-        </Link>
         <PageHeader
+          eyebrow="Learning"
           title={course.title}
           description={course.summary || course.slug}
-          actions={<StatusBadge status={course.status ?? "DRAFT"} />}
+          breadcrumbs={[
+            { label: "Programs", href: "/admin/courses" },
+            { label: course.title },
+          ]}
+          status={<StatusBadge status={course.status ?? "DRAFT"} />}
         />
         <div className="flex flex-wrap gap-2">
           {course.status !== "PUBLISHED" ? (
@@ -320,7 +318,7 @@ export function AdminCourseDetailView({ courseId }: { courseId: number }) {
         onSaved={refetch}
       />
 
-      <section className="space-y-4 border border-border bg-surface p-5">
+      <section className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-border/70">
         <h2 className="font-display text-lg font-medium text-primary">
           Add module
         </h2>
@@ -358,7 +356,7 @@ export function AdminCourseDetailView({ courseId }: { courseId: number }) {
         </div>
       </section>
 
-      <section className="space-y-4 border border-border bg-surface p-5">
+      <section className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-border/70">
         <div className="space-y-1">
           <h2 className="font-display text-lg font-medium text-primary">
             Add lesson
@@ -488,7 +486,7 @@ export function AdminCourseDetailView({ courseId }: { courseId: number }) {
           modules.map((module, moduleIndex) => {
             const lessons = [...(module.lessons ?? [])].sort(bySortOrder);
             return (
-              <div key={module.id} className="border border-border bg-surface">
+              <div key={module.id} className="rounded-xl bg-surface shadow-card ring-1 ring-border/70">
                 <div className="flex items-center justify-between gap-3 border-b border-border bg-secondary/40 px-4 py-3">
                   <h3 className="font-display text-lg font-medium text-primary">
                     {module.title}

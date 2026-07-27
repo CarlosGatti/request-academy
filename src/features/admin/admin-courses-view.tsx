@@ -1,23 +1,22 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageLoading } from "@/components/ui/page-loading";
-import { Select } from "@/components/ui/select";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { Textarea } from "@/components/ui/select";
+import { ProgramCard } from "@/components/ui/program-card";
+import { Select, Textarea } from "@/components/ui/select";
 import { useAdminAcademy } from "@/features/admin/admin-academy-context";
 import {
+  ArchiveDefinedAcademyCourseDocument,
   CreateDefinedAcademyCourseDocument,
   DefinedAcademyCoursesAdminDocument,
   PublishDefinedAcademyCourseDocument,
-  ArchiveDefinedAcademyCourseDocument,
 } from "@/graphql/generated/graphql";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
 import { requireGraphQLInt } from "@/lib/graphql/ids";
@@ -30,6 +29,9 @@ function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 
+type StatusFilter = "ALL" | "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED";
+type SortKey = "newest" | "title" | "status";
+
 export function AdminCoursesView() {
   const { academyId } = useAdminAcademy();
   const [showForm, setShowForm] = useState(false);
@@ -38,6 +40,10 @@ export function AdminCoursesView() {
   const [summary, setSummary] = useState("");
   const [visibility, setVisibility] = useState("PUBLIC");
   const [formError, setFormError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
+  const [pendingArchiveId, setPendingArchiveId] = useState<number | null>(null);
 
   const coursesQuery = useQuery(DefinedAcademyCoursesAdminDocument, {
     variables: { academyId: academyId ?? 0 },
@@ -50,6 +56,37 @@ export function AdminCoursesView() {
   const [archiveCourse] = useMutation(ArchiveDefinedAcademyCourseDocument);
 
   const courses = coursesQuery.data?.definedAcademyCourses ?? [];
+
+  const filteredCourses = useMemo(() => {
+    const source = coursesQuery.data?.definedAcademyCourses ?? [];
+    const query = search.trim().toLowerCase();
+    const rows = source.filter((course) => {
+      const status = course.status ?? "DRAFT";
+      if (statusFilter !== "ALL" && status !== statusFilter) return false;
+      if (!query) return true;
+      return (
+        course.title.toLowerCase().includes(query) ||
+        course.slug.toLowerCase().includes(query) ||
+        (course.summary ?? "").toLowerCase().includes(query)
+      );
+    });
+
+    return [...rows].sort((a, b) => {
+      if (sortKey === "title") {
+        return a.title.localeCompare(b.title);
+      }
+      if (sortKey === "status") {
+        return (a.status ?? "").localeCompare(b.status ?? "");
+      }
+      const aTime = a.publishedAt
+        ? new Date(String(a.publishedAt)).getTime()
+        : a.id;
+      const bTime = b.publishedAt
+        ? new Date(String(b.publishedAt)).getTime()
+        : b.id;
+      return Number(bTime) - Number(aTime);
+    });
+  }, [coursesQuery.data?.definedAcademyCourses, search, sortKey, statusFilter]);
 
   const onCreate = async () => {
     if (!academyId) return;
@@ -85,11 +122,12 @@ export function AdminCoursesView() {
   return (
     <div className="space-y-8">
       <PageHeader
+        eyebrow="Learning"
         title="Programs"
-        description="Create and publish professional development pathways."
+        description="Create, structure, publish, and monitor professional development programs."
         actions={
           <Button variant="highlight" onClick={() => setShowForm((v) => !v)}>
-            {showForm ? "Cancel" : "New program"}
+            {showForm ? "Cancel" : "Create program"}
           </Button>
         }
       />
@@ -99,7 +137,10 @@ export function AdminCoursesView() {
       ) : null}
 
       {showForm ? (
-        <div className="space-y-4 border border-border bg-surface p-5">
+        <div className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-border/70">
+          <h2 className="font-display text-lg font-medium text-primary">
+            New program
+          </h2>
           {formError ? <Alert tone="danger">{formError}</Alert> : null}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -148,67 +189,155 @@ export function AdminCoursesView() {
         </div>
       ) : null}
 
-      <div className="space-y-3">
-        {courses.length === 0 ? (
-          <Alert tone="info">No programs yet. Create the first development path.</Alert>
-        ) : (
-          courses.map((course) => (
-            <div
-              key={course.id}
-              className="flex flex-col gap-3 border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
+      {courses.length > 0 ? (
+        <div className="flex flex-col gap-3 rounded-xl bg-surface p-3 shadow-card ring-1 ring-border/70 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Label htmlFor="program-search">Search</Label>
+            <Input
+              id="program-search"
+              placeholder="Search by title, slug, or summary"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </div>
+          <div className="w-full space-y-2 sm:w-40">
+            <Label htmlFor="program-status">Status</Label>
+            <Select
+              id="program-status"
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as StatusFilter)
+              }
             >
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link
-                    href={`/admin/courses/${course.id}`}
-                    className="font-display text-lg font-medium text-primary hover:underline"
+              <option value="ALL">All statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="PUBLISHED">Published</option>
+              <option value="SCHEDULED">Scheduled</option>
+              <option value="ARCHIVED">Archived</option>
+            </Select>
+          </div>
+          <div className="w-full space-y-2 sm:w-40">
+            <Label htmlFor="program-sort">Sort</Label>
+            <Select
+              id="program-sort"
+              value={sortKey}
+              onChange={(event) => setSortKey(event.target.value as SortKey)}
+            >
+              <option value="newest">Newest</option>
+              <option value="title">Title</option>
+              <option value="status">Status</option>
+            </Select>
+          </div>
+        </div>
+      ) : null}
+
+      {courses.length === 0 ? (
+        <EmptyState
+          title="No programs yet"
+          description="Create the first professional development pathway for this academy."
+          action={
+            <Button variant="highlight" onClick={() => setShowForm(true)}>
+              Create program
+            </Button>
+          }
+        />
+      ) : filteredCourses.length === 0 ? (
+        <EmptyState
+          title="No matching programs"
+          description="Try a different search or clear the status filter."
+          action={
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearch("");
+                setStatusFilter("ALL");
+              }}
+            >
+              Clear filters
+            </Button>
+          }
+        />
+      ) : (
+        <div className="space-y-3">
+          {filteredCourses.map((course) => {
+            const moduleCount = course.modules?.length ?? 0;
+            const lessonCount =
+              course.modules?.reduce(
+                (total, module) => total + (module.lessons?.length ?? 0),
+                0,
+              ) ?? 0;
+
+            return (
+              <div key={course.id} className="space-y-2">
+                <ProgramCard
+                  program={{
+                    id: course.id,
+                    title: course.title,
+                    slug: course.slug,
+                    summary: course.summary,
+                    status: course.status,
+                    visibility: course.visibility,
+                    moduleCount,
+                    lessonCount,
+                    publishedAt: course.publishedAt,
+                  }}
+                  onPublish={() =>
+                    void publishCourse({
+                      variables: { academyId, courseId: course.id },
+                    }).then(() => coursesQuery.refetch())
+                  }
+                  onArchive={() => setPendingArchiveId(course.id)}
+                />
+                {pendingArchiveId === course.id ? (
+                  <div
+                    role="alertdialog"
+                    aria-labelledby={`archive-title-${course.id}`}
+                    aria-describedby={`archive-desc-${course.id}`}
+                    className="rounded-xl bg-sea-foam/70 p-4 ring-1 ring-border"
                   >
-                    {course.title}
-                  </Link>
-                  <StatusBadge status={course.status ?? "DRAFT"} />
-                </div>
-                <p className="text-sm text-muted">
-                  {course.slug} · {course.modules?.length ?? 0} modules
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href={`/admin/courses/${course.id}`}
-                  className="inline-flex h-9 items-center rounded-md border border-border px-3 text-sm font-medium"
-                >
-                  Edit
-                </Link>
-                {course.status !== "PUBLISHED" ? (
-                  <Button
-                    size="sm"
-                    variant="accent"
-                    onClick={() =>
-                      void publishCourse({
-                        variables: { academyId, courseId: course.id },
-                      }).then(() => coursesQuery.refetch())
-                    }
-                  >
-                    Publish
-                  </Button>
+                    <p
+                      id={`archive-title-${course.id}`}
+                      className="font-medium text-primary"
+                    >
+                      Archive “{course.title}”?
+                    </p>
+                    <p
+                      id={`archive-desc-${course.id}`}
+                      className="mt-1 text-sm text-muted"
+                    >
+                      Archived programs leave the active catalog. You can still
+                      open them from this list when filtering by Archived.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          void archiveCourse({
+                            variables: { academyId, courseId: course.id },
+                          }).then(async () => {
+                            setPendingArchiveId(null);
+                            await coursesQuery.refetch();
+                          })
+                        }
+                      >
+                        Confirm archive
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setPendingArchiveId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
                 ) : null}
-                {course.status !== "ARCHIVED" ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      void archiveCourse({
-                        variables: { academyId, courseId: course.id },
-                      }).then(() => coursesQuery.refetch())
-                    }
-                  >
-                    Archive
-                  </Button>
-                ) : null}
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

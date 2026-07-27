@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/ui/page-header";
@@ -17,11 +18,24 @@ import {
 } from "@/graphql/generated/graphql";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
 
+function formatDate(value: unknown) {
+  if (!value) return null;
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function AdminShortLinksView() {
   const { academyId } = useAdminAcademy();
+  const [showForm, setShowForm] = useState(false);
   const [destinationUrl, setDestinationUrl] = useState("");
   const [customCode, setCustomCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const linksQuery = useQuery(DefinedAcademyShortLinksAdminDocument, {
     variables: { academyId: academyId ?? 0 },
@@ -33,6 +47,16 @@ export function AdminShortLinksView() {
   const [disableLink] = useMutation(DisableDefinedAcademyShortLinkDocument);
 
   const links = linksQuery.data?.definedAcademyShortLinks ?? [];
+  const filtered = useMemo(() => {
+    const source = linksQuery.data?.definedAcademyShortLinks ?? [];
+    const query = search.trim().toLowerCase();
+    if (!query) return source;
+    return source.filter(
+      (link) =>
+        link.code.toLowerCase().includes(query) ||
+        link.destinationUrl.toLowerCase().includes(query),
+    );
+  }, [linksQuery.data?.definedAcademyShortLinks, search]);
 
   if (!academyId) {
     return <Alert tone="warning">Select an academy to manage short links.</Alert>;
@@ -43,89 +67,143 @@ export function AdminShortLinksView() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Short links"
+        eyebrow="Growth"
+        title="Short Links"
         description="Tracked redirects resolved only via the academy API."
+        actions={
+          <Button variant="highlight" onClick={() => setShowForm((v) => !v)}>
+            {showForm ? "Cancel" : "Create short link"}
+          </Button>
+        }
       />
 
-      <div className="space-y-4 border border-border bg-surface p-5">
-        <h2 className="font-display text-lg font-medium text-primary">
-          Create short link
-        </h2>
-        {error ? <Alert tone="danger">{error}</Alert> : null}
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="space-y-2 md:col-span-2">
-            <Label>Destination URL</Label>
-            <Input
-              value={destinationUrl}
-              onChange={(e) => setDestinationUrl(e.target.value)}
-              placeholder="https://"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Custom code (optional)</Label>
-            <Input
-              value={customCode}
-              onChange={(e) => setCustomCode(e.target.value)}
-            />
-          </div>
-        </div>
-        <Button
-          disabled={loading || !destinationUrl}
-          onClick={() => {
-            setError(null);
-            void createLink({
-              variables: {
-                academyId,
-                input: {
-                  destinationUrl,
-                  customCode: customCode || undefined,
-                },
-              },
-            })
-              .then(() => {
-                setDestinationUrl("");
-                setCustomCode("");
-                return linksQuery.refetch();
-              })
-              .catch((err) =>
-                setError(getGraphQLErrorMessage(err, "Unable to create short link.")),
-              );
-          }}
-        >
-          {loading ? "Creating…" : "Create link"}
-        </Button>
-      </div>
-
-      <div className="space-y-3">
-        {links.map((link) => (
-          <div
-            key={link.id}
-            className="flex flex-col gap-3 border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="min-w-0 space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <code className="font-mono text-sm text-primary">/l/{link.code}</code>
-                <StatusBadge status={link.status} />
-                <span className="text-xs text-muted">{link.visitCount} visits</span>
-              </div>
-              <p className="truncate text-sm text-muted">{link.destinationUrl}</p>
+      {showForm ? (
+        <div className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-border/70">
+          <h2 className="font-display text-lg font-medium text-primary">
+            Create short link
+          </h2>
+          {error ? <Alert tone="danger">{error}</Alert> : null}
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="short-destination">Destination URL</Label>
+              <Input
+                id="short-destination"
+                value={destinationUrl}
+                onChange={(e) => setDestinationUrl(e.target.value)}
+                placeholder="https://"
+              />
             </div>
-            {link.status === "ACTIVE" ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  void disableLink({
-                    variables: { academyId, shortLinkId: link.id },
-                  }).then(() => linksQuery.refetch())
-                }
-              >
-                Disable
-              </Button>
-            ) : null}
+            <div className="space-y-2">
+              <Label htmlFor="short-code">Custom slug (optional)</Label>
+              <Input
+                id="short-code"
+                value={customCode}
+                onChange={(e) => setCustomCode(e.target.value)}
+              />
+            </div>
           </div>
-        ))}
-      </div>
+          <Button
+            disabled={loading || !destinationUrl}
+            onClick={() => {
+              setError(null);
+              void createLink({
+                variables: {
+                  academyId,
+                  input: {
+                    destinationUrl,
+                    customCode: customCode || undefined,
+                  },
+                },
+              })
+                .then(() => {
+                  setDestinationUrl("");
+                  setCustomCode("");
+                  setShowForm(false);
+                  return linksQuery.refetch();
+                })
+                .catch((err) =>
+                  setError(
+                    getGraphQLErrorMessage(err, "Unable to create short link."),
+                  ),
+                );
+            }}
+          >
+            {loading ? "Creating…" : "Create link"}
+          </Button>
+        </div>
+      ) : null}
+
+      {links.length > 0 ? (
+        <div className="space-y-2 rounded-xl bg-surface p-3 shadow-card ring-1 ring-border/70">
+          <Label htmlFor="short-search">Search</Label>
+          <Input
+            id="short-search"
+            placeholder="Search by slug or destination"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      ) : null}
+
+      {links.length === 0 ? (
+        <EmptyState
+          title="No short links yet"
+          description="Create tracked redirects for campaigns, partners, and outreach."
+          action={
+            <Button variant="highlight" onClick={() => setShowForm(true)}>
+              Create short link
+            </Button>
+          }
+        />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          title="No matching links"
+          description="Try a different search."
+        />
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((link) => {
+            const expires = formatDate(link.expiresAt);
+            return (
+              <article
+                key={link.id}
+                className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card ring-1 ring-border/70 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <code className="font-mono text-sm text-primary">
+                      /l/{link.code}
+                    </code>
+                    <StatusBadge status={link.status} />
+                  </div>
+                  <p className="truncate text-sm text-muted">
+                    {link.destinationUrl}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {link.visitCount} visit{link.visitCount === 1 ? "" : "s"}
+                    {expires ? ` · Expires ${expires}` : ""}
+                    {link.partnerId ? ` · Partner #${link.partnerId}` : ""}
+                    {link.courseId ? ` · Program #${link.courseId}` : ""}
+                  </p>
+                </div>
+                {link.status === "ACTIVE" ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      void disableLink({
+                        variables: { academyId, shortLinkId: link.id },
+                      }).then(() => linksQuery.refetch())
+                    }
+                  >
+                    Disable
+                  </Button>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

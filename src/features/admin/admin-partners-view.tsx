@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,7 +61,7 @@ function PartnerEditForm({
   );
 
   return (
-    <div className="space-y-4 border border-accent/30 bg-surface p-5">
+    <div className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-accent/20">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-display text-lg font-medium text-primary">
           Edit partner
@@ -212,6 +213,7 @@ function PartnerEditForm({
 
 export function AdminPartnersView() {
   const { academyId } = useAdminAcademy();
+  const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -219,6 +221,8 @@ export function AdminPartnersView() {
   const [featured, setFeatured] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | string>("ALL");
 
   const partnersQuery = useQuery(DefinedAcademyPartnersAdminDocument, {
     variables: { academyId: academyId ?? 0 },
@@ -235,6 +239,23 @@ export function AdminPartnersView() {
       ? null
       : (partners.find((partner) => partner.id === editingId) ?? null);
 
+  const filteredPartners = useMemo(() => {
+    const source = partnersQuery.data?.definedAcademyPartners ?? [];
+    const query = search.trim().toLowerCase();
+    return source.filter((partner) => {
+      if (statusFilter !== "ALL" && (partner.status ?? "DRAFT") !== statusFilter) {
+        return false;
+      }
+      if (!query) return true;
+      return (
+        partner.name.toLowerCase().includes(query) ||
+        partner.slug.toLowerCase().includes(query) ||
+        (partner.location ?? "").toLowerCase().includes(query) ||
+        (partner.category?.name ?? "").toLowerCase().includes(query)
+      );
+    });
+  }, [partnersQuery.data?.definedAcademyPartners, search, statusFilter]);
+
   if (!academyId) {
     return <Alert tone="warning">Select an academy to manage partners.</Alert>;
   }
@@ -244,8 +265,16 @@ export function AdminPartnersView() {
   return (
     <div className="space-y-8">
       <PageHeader
+        eyebrow="Community"
         title="Partners"
         description="Professional network directory for this academy."
+        actions={
+          editingPartner ? null : (
+            <Button variant="highlight" onClick={() => setShowForm((v) => !v)}>
+              {showForm ? "Cancel" : "Add partner"}
+            </Button>
+          )
+        }
       />
 
       {editingPartner ? (
@@ -256,16 +285,17 @@ export function AdminPartnersView() {
           onCancel={() => setEditingId(null)}
           onSaved={() => partnersQuery.refetch()}
         />
-      ) : (
-        <div className="space-y-4 border border-border bg-surface p-5">
+      ) : showForm ? (
+        <div className="space-y-4 rounded-xl bg-surface p-5 shadow-card ring-1 ring-border/70">
           <h2 className="font-display text-lg font-medium text-primary">
             Add partner
           </h2>
           {error ? <Alert tone="danger">{error}</Alert> : null}
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label htmlFor="partner-name">Name</Label>
               <Input
+                id="partner-name"
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
@@ -274,20 +304,26 @@ export function AdminPartnersView() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Slug</Label>
-              <Input value={slug} onChange={(e) => setSlug(e.target.value)} />
+              <Label htmlFor="partner-slug">Slug</Label>
+              <Input
+                id="partner-slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+              />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Website</Label>
+              <Label htmlFor="partner-website">Website</Label>
               <Input
+                id="partner-website"
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label htmlFor="partner-description">Description</Label>
             <Textarea
+              id="partner-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -323,6 +359,7 @@ export function AdminPartnersView() {
                   setDescription("");
                   setWebsiteUrl("");
                   setFeatured(false);
+                  setShowForm(false);
                   return partnersQuery.refetch();
                 })
                 .catch((err) =>
@@ -335,88 +372,138 @@ export function AdminPartnersView() {
             {loading ? "Saving…" : "Create partner"}
           </Button>
         </div>
-      )}
+      ) : null}
 
-      <div className="space-y-3">
-        {partners.map((partner) => (
-          <div
-            key={partner.id}
-            className="flex flex-col gap-3 border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex gap-3">
-              <div className="relative size-12 shrink-0 overflow-hidden border border-border bg-sea-foam">
-                {partner.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={partner.logoUrl}
-                    alt=""
-                    className="h-full w-full object-contain p-0.5"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-[10px] text-muted">
-                    Logo
-                  </div>
-                )}
-              </div>
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium text-primary">{partner.name}</p>
-                  <StatusBadge status={partner.status ?? "DRAFT"} />
-                  {partner.featured ? (
-                    <span className="text-xs font-medium text-highlight">
-                      Featured
-                    </span>
-                  ) : null}
+      {partners.length > 0 ? (
+        <div className="flex flex-col gap-3 rounded-xl bg-surface p-3 shadow-card ring-1 ring-border/70 sm:flex-row">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Label htmlFor="partner-search">Search</Label>
+            <Input
+              id="partner-search"
+              placeholder="Search by name, location, or category"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="w-full space-y-2 sm:w-44">
+            <Label htmlFor="partner-status">Status</Label>
+            <Select
+              id="partner-status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="ALL">All statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </Select>
+          </div>
+        </div>
+      ) : null}
+
+      {partners.length === 0 ? (
+        <EmptyState
+          title="No partners yet"
+          description="Add organizations and professionals to the academy network directory."
+          action={
+            <Button variant="highlight" onClick={() => setShowForm(true)}>
+              Add partner
+            </Button>
+          }
+        />
+      ) : filteredPartners.length === 0 ? (
+        <EmptyState
+          title="No matching partners"
+          description="Try a different search or status filter."
+        />
+      ) : (
+        <div className="space-y-3">
+          {filteredPartners.map((partner) => (
+            <article
+              key={partner.id}
+              className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card ring-1 ring-border/70 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex gap-3">
+                <div className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-border bg-sea-foam">
+                  {partner.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={partner.logoUrl}
+                      alt=""
+                      className="h-full w-full object-contain p-0.5"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] text-muted">
+                      Logo
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-muted">{partner.slug}</p>
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-primary">{partner.name}</p>
+                    <StatusBadge status={partner.status ?? "DRAFT"} />
+                    {partner.featured ? (
+                      <span className="text-xs font-medium text-highlight">
+                        Featured
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-sm text-muted">
+                    {partner.category?.name
+                      ? `${partner.category.name} · `
+                      : ""}
+                    {partner.location || "Region not set"}
+                    {partner.websiteUrl ? ` · ${partner.websiteUrl}` : ""}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant={editingId === partner.id ? "primary" : "outline"}
-                onClick={() =>
-                  setEditingId(editingId === partner.id ? null : partner.id)
-                }
-              >
-                {editingId === partner.id ? "Editing" : "Edit"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  void updatePartner({
-                    variables: {
-                      academyId,
-                      partnerId: partner.id,
-                      input: { featured: !partner.featured },
-                    },
-                  }).then(() => partnersQuery.refetch())
-                }
-              >
-                {partner.featured ? "Unfeature" : "Feature"}
-              </Button>
-              {partner.status !== "ARCHIVED" ? (
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant={editingId === partner.id ? "primary" : "outline"}
+                  onClick={() =>
+                    setEditingId(editingId === partner.id ? null : partner.id)
+                  }
+                >
+                  {editingId === partner.id ? "Editing" : "Edit"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() =>
                     void updatePartner({
                       variables: {
                         academyId,
                         partnerId: partner.id,
-                        input: { status: "ARCHIVED" },
+                        input: { featured: !partner.featured },
                       },
                     }).then(() => partnersQuery.refetch())
                   }
                 >
-                  Archive
+                  {partner.featured ? "Unfeature" : "Feature"}
                 </Button>
-              ) : null}
-            </div>
-          </div>
-        ))}
-      </div>
+                {partner.status !== "ARCHIVED" ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      void updatePartner({
+                        variables: {
+                          academyId,
+                          partnerId: partner.id,
+                          input: { status: "ARCHIVED" },
+                        },
+                      }).then(() => partnersQuery.refetch())
+                    }
+                  >
+                    Archive
+                  </Button>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

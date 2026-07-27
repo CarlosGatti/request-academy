@@ -15,7 +15,7 @@ import {
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
 
 const DEFAULT_MESSAGE =
-  "Hi Hailee — here's a stakeholder briefing from the Data Audit Lab. It summarizes public RE-Quest professional data quality ahead of Thursday's conversation. Individual contact details are withheld; aggregates and content opportunities are front and center.";
+  "Here's a stakeholder briefing from the Data Audit Lab. It summarizes public RE-Quest professional data quality. Individual contact details are withheld; aggregates and content opportunities are front and center.";
 
 function localShareUrl(token: string, fallbackUrl: string) {
   if (typeof window !== "undefined" && window.location?.origin) {
@@ -38,8 +38,8 @@ export function DataAuditSharePanel() {
   const [createShare, createState] = useMutation(CreateDataAuditShareLinkDocument);
   const [revokeShare, revokeState] = useMutation(RevokeDataAuditShareLinkDocument);
 
-  const [recipientName, setRecipientName] = useState("Hailee");
-  const [title, setTitle] = useState("RE-Quest Data Quality Briefing");
+  const [recipientName, setRecipientName] = useState("");
+  const [title, setTitle] = useState("RE-Quest Directory Quality Briefing");
   const [personalMessage, setPersonalMessage] = useState(DEFAULT_MESSAGE);
   const [expiresInDays, setExpiresInDays] = useState("21");
   const [copiedId, setCopiedId] = useState<number | null>(null);
@@ -138,7 +138,7 @@ export function DataAuditSharePanel() {
             className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
             value={recipientName}
             onChange={(e) => setRecipientName(e.target.value)}
-            placeholder="Hailee"
+            placeholder="Leadership Team"
           />
         </label>
         <label className="space-y-1 text-sm">

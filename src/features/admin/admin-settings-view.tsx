@@ -207,8 +207,9 @@ export function AdminSettingsView() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Academy settings"
-        description="Branding and theme for the selected tenant."
+        eyebrow="Administration"
+        title="Settings"
+        description="Workspace branding and theme for the selected academy."
       />
       <AcademySettingsForm
         key={academy.id}

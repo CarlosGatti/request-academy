@@ -22,12 +22,10 @@ import {
   type MonthlyRegistrations,
   type SeverityDetail,
 } from "@/features/admin/data-audit/chart-cards";
+import { DataAuditAvatar } from "@/features/admin/data-audit/data-audit-avatar";
 import { DataAuditSharePanel } from "@/features/admin/data-audit/data-audit-share-panel";
 import { DemographicMapCard, type GeoMapData } from "@/features/admin/data-audit/demographic-map-card";
-import {
-  initialsFromName,
-  resolveAuditAvatarSrc,
-} from "@/features/admin/data-audit/resolve-avatar";
+import { parseOverviewMetrics } from "@/features/admin/data-audit/types";
 import {
   DataAuditFindingsDocument,
   DataAuditOverviewDocument,
@@ -41,6 +39,7 @@ import {
 } from "@/graphql/generated/graphql";
 import { getGraphQLErrorMessage } from "@/lib/graphql/errors";
 import { cn } from "@/lib/utils/cn";
+import { requireGraphQLInt } from "@/lib/graphql/ids";
 
 type TabId =
   | "overview"
@@ -54,7 +53,7 @@ const tabs: { id: TabId; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "profiles", label: "Profiles" },
   { id: "schema", label: "Schema" },
-  { id: "discrepancies", label: "Discrepancies" },
+  { id: "discrepancies", label: "Findings" },
   { id: "exposure", label: "Public Exposure" },
   { id: "runs", label: "Audit Runs" },
 ];
@@ -189,54 +188,6 @@ function HeaderTip({
         {label}
       </span>
     </th>
-  );
-}
-
-function AvatarCell({
-  name,
-  avatarUrl,
-  avatarPath,
-  size = "sm",
-}: {
-  name?: string | null;
-  avatarUrl?: string | null;
-  avatarPath?: string | null;
-  size?: "sm" | "lg";
-}) {
-  const { src, pendingCdn } = resolveAuditAvatarSrc({ avatarUrl, avatarPath });
-  const initials = initialsFromName(name);
-  const sizeClass = size === "lg" ? "size-16 text-base" : "size-8 text-xs";
-  return (
-    <div
-      className={cn("flex items-center gap-2", size === "lg" && "gap-3")}
-      title={
-        pendingCdn
-          ? "Avatar on file — CDN base not configured (NEXT_PUBLIC_REQUEST_MEDIA_BASE_URL)"
-          : undefined
-      }
-    >
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt=""
-          className={cn(sizeClass, "rounded-full object-cover")}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <span
-          className={cn(
-            "inline-flex items-center justify-center rounded-full bg-secondary font-medium text-primary",
-            sizeClass,
-            pendingCdn && "ring-1 ring-highlight/50",
-          )}
-        >
-          {initials}
-        </span>
-      )}
-      {size === "sm" ? <span>{name ?? "—"}</span> : null}
-    </div>
   );
 }
 
@@ -405,12 +356,23 @@ export function AdminDataAuditLabView() {
   const metrics = asMetrics(
     overviewQuery.data?.dataAuditOverview?.overviewMetrics,
   );
-  const distributions = asDistributions(
+  const parsedOverview = parseOverviewMetrics(
     overviewQuery.data?.dataAuditOverview?.overviewMetrics,
   );
-  const severityMeta = asSeverityDetails(
-    overviewQuery.data?.dataAuditOverview?.overviewMetrics,
-  );
+  const distributions = {
+    ...asDistributions(overviewQuery.data?.dataAuditOverview?.overviewMetrics),
+    ...(parsedOverview?.distributions ?? {}),
+  };
+  const severityMeta = {
+    details:
+      parsedOverview?.distributions.findingsBySeverityDetail ??
+      asSeverityDetails(overviewQuery.data?.dataAuditOverview?.overviewMetrics)
+        .details,
+    note:
+      parsedOverview?.distributions.findingsCountingNote ||
+      asSeverityDetails(overviewQuery.data?.dataAuditOverview?.overviewMetrics)
+        .note,
+  };
   const monthlyRegistrations = asMonthlyRegistrations(
     overviewQuery.data?.dataAuditOverview?.overviewMetrics,
   );
@@ -446,8 +408,9 @@ export function AdminDataAuditLabView() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Intelligence"
         title="Data Audit Lab"
-        description="Internal workspace for public API analysis, data quality review, exposure auditing, and Academy content insights."
+        description="Transform public platform data into aggregated insights and content opportunities."
         actions={
           <Button
             disabled={isRunning || startState.loading}
@@ -498,14 +461,21 @@ export function AdminDataAuditLabView() {
         </Alert>
       ) : null}
 
-      <div className="flex flex-wrap gap-1 border-b border-border pb-2">
+      <div
+        role="tablist"
+        aria-label="Data Audit Lab sections"
+        className="flex flex-wrap gap-1 rounded-xl bg-surface p-1.5 shadow-card ring-1 ring-border/70"
+      >
         {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
+            role="tab"
+            aria-selected={tab === item.id}
             onClick={() => setTab(item.id)}
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm",
+              "rounded-md px-3 py-2 text-sm transition-colors",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
               tab === item.id
                 ? "bg-secondary font-medium text-primary"
                 : "text-muted hover:bg-sea-foam hover:text-primary",
@@ -525,7 +495,7 @@ export function AdminDataAuditLabView() {
               {metricCards.map((card) => (
                 <div
                   key={card.label}
-                  className="border border-border bg-surface p-4"
+                  className="rounded-xl bg-surface p-4 shadow-card ring-1 ring-border/70"
                 >
                   <p className="text-2xl font-medium text-primary">
                     {card.value ?? "—"}
@@ -821,10 +791,13 @@ export function AdminDataAuditLabView() {
                         onClick={() => setSelectedProfileId(row.id)}
                       >
                         <td className="px-3 py-2 text-primary">
-                          <AvatarCell
-                            name={row.displayName}
+                          <DataAuditAvatar
+                            displayName={row.displayName}
                             avatarUrl={row.avatarUrl}
                             avatarPath={row.avatarPath}
+                            sourceProfileId={row.sourceProfileId}
+                            size={32}
+                            showName
                           />
                         </td>
                         <td className="px-3 py-2">
@@ -893,8 +866,8 @@ export function AdminDataAuditLabView() {
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
                     {profileDetailQuery.data?.dataAuditProfile ? (
-                      <AvatarCell
-                        name={
+                      <DataAuditAvatar
+                        displayName={
                           profileDetailQuery.data.dataAuditProfile.displayName
                         }
                         avatarUrl={
@@ -903,7 +876,11 @@ export function AdminDataAuditLabView() {
                         avatarPath={
                           profileDetailQuery.data.dataAuditProfile.avatarPath
                         }
-                        size="lg"
+                        sourceProfileId={
+                          profileDetailQuery.data.dataAuditProfile
+                            .sourceProfileId
+                        }
+                        size={64}
                       />
                     ) : null}
                     <div>
@@ -1135,7 +1112,10 @@ export function AdminDataAuditLabView() {
           showStatusFilter={tab === "discrepancies"}
           onUpdateStatus={(id, status) =>
             void updateFinding({
-              variables: { id, input: { status } },
+              variables: {
+                id: requireGraphQLInt(id, "findingId"),
+                input: { status },
+              },
             })
           }
         />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils/cn";
 
@@ -77,7 +77,12 @@ function CardShell({
   children: ReactNode;
 }) {
   return (
-    <section className={cn("border border-border bg-surface p-4", className)}>
+    <section
+      className={cn(
+        "rounded-xl bg-surface p-4 shadow-card ring-1 ring-border/70",
+        className,
+      )}
+    >
       <h2 className="font-display text-lg text-primary">{title}</h2>
       {caption ? <p className="mt-1 text-xs text-muted">{caption}</p> : null}
       <div className="mt-3">{children}</div>
@@ -211,7 +216,21 @@ export function AgentTypeDonutCard({
   const radius = 36;
   const stroke = 14;
   const circumference = 2 * Math.PI * radius;
-  let offset = 0;
+  const slices: Array<{
+    label: string;
+    count: number;
+    color: string;
+    length: number;
+    offset: number;
+  }> = [];
+  {
+    let offset = 0;
+    for (const slice of data) {
+      const length = (slice.count / total) * circumference;
+      slices.push({ ...slice, length, offset });
+      offset += length;
+    }
+  }
 
   return (
     <CardShell title="Agent type distribution" className={className}>
@@ -225,25 +244,20 @@ export function AgentTypeDonutCard({
             stroke="var(--color-secondary, #e5e7eb)"
             strokeWidth={stroke}
           />
-          {data.map((slice) => {
-            const length = (slice.count / total) * circumference;
-            const el = (
-              <circle
-                key={slice.label}
-                cx="50"
-                cy="50"
-                r={radius}
-                fill="none"
-                stroke={slice.color}
-                strokeWidth={stroke}
-                strokeDasharray={`${length} ${circumference - length}`}
-                strokeDashoffset={-offset}
-                transform="rotate(-90 50 50)"
-              />
-            );
-            offset += length;
-            return el;
-          })}
+          {slices.map((slice) => (
+            <circle
+              key={slice.label}
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              stroke={slice.color}
+              strokeWidth={stroke}
+              strokeDasharray={`${slice.length} ${circumference - slice.length}`}
+              strokeDashoffset={-slice.offset}
+              transform="rotate(-90 50 50)"
+            />
+          ))}
           <text
             x="50"
             y="50"
@@ -510,13 +524,13 @@ export function NewRegistrationsMonthlyCard({
   const years = data?.availableYears?.length
     ? data.availableYears
     : [data?.defaultYear ?? new Date().getFullYear()];
-  const [year, setYear] = useState(data?.defaultYear ?? years[0]);
-
-  useEffect(() => {
-    if (data?.defaultYear && !years.includes(year)) {
-      setYear(data.defaultYear);
-    }
-  }, [data?.defaultYear, year, years]);
+  const [yearOverride, setYearOverride] = useState<number | null>(null);
+  const year =
+    yearOverride != null && years.includes(yearOverride)
+      ? yearOverride
+      : data?.defaultYear && years.includes(data.defaultYear)
+        ? data.defaultYear
+        : years[0];
 
   const months =
     data?.byYear?.[String(year)] ??
@@ -561,7 +575,7 @@ export function NewRegistrationsMonthlyCard({
           <select
             className="rounded-md border border-border bg-surface px-2 py-1 text-sm text-primary"
             value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
+            onChange={(e) => setYearOverride(Number(e.target.value))}
           >
             {years.map((y) => (
               <option key={y} value={y}>
@@ -650,40 +664,75 @@ export function TopCitiesBarCard({
     );
   }
 
+  const chartH = 280;
+  const padL = 8;
+  const padR = 8;
+  const padB = 72;
+  const padT = 16;
+  const width = Math.max(360, data.length * 56);
+  const plotH = chartH - padB - padT;
+  const slot = (width - padL - padR) / data.length;
+  const barW = Math.min(36, slot * 0.62);
+
   return (
     <CardShell
       title="Top cities"
       caption="Ranked by profile mentions in the public listing."
       className={className}
     >
-      <ul className="space-y-2.5" aria-label="Top cities ranking">
-        {data.map((item, index) => (
-          <li key={item.label} className="space-y-1">
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="min-w-0 text-sm text-primary">
-                <span className="mr-2 tabular-nums text-muted">
-                  {index + 1}.
-                </span>
-                <span className="break-words">{item.label}</span>
-              </span>
-              <span className="shrink-0 text-sm font-medium tabular-nums text-primary">
-                {item.count}
-              </span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-sm bg-secondary">
-              <div
-                className="h-full rounded-sm"
-                style={{
-                  width: `${(item.count / max) * 100}%`,
-                  backgroundColor: "#0F766E",
-                  opacity: 0.35 + (0.65 * (data.length - index)) / data.length,
-                }}
-                title={`${item.label}: ${item.count}`}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${width} ${chartH}`}
+          className="min-h-[280px] w-full"
+          role="img"
+          aria-label="Top cities vertical bar chart"
+        >
+          {data.map((item, index) => {
+            const h = (item.count / max) * plotH;
+            const x = padL + index * slot + (slot - barW) / 2;
+            const y = padT + plotH - h;
+            const opacity =
+              0.4 + (0.6 * (data.length - index)) / data.length;
+            const labelY = chartH - 8;
+            return (
+              <g key={item.label}>
+                <rect
+                  x={x}
+                  y={y}
+                  width={barW}
+                  height={Math.max(h, 2)}
+                  rx={3}
+                  fill="#0F766E"
+                  opacity={opacity}
+                >
+                  <title>
+                    {item.label}: {item.count}
+                  </title>
+                </rect>
+                <text
+                  x={x + barW / 2}
+                  y={y - 6}
+                  textAnchor="middle"
+                  className="fill-primary text-[10px] font-medium"
+                >
+                  {item.count}
+                </text>
+                <text
+                  x={x + barW / 2}
+                  y={labelY}
+                  textAnchor="end"
+                  transform={`rotate(-40 ${x + barW / 2} ${labelY})`}
+                  className="fill-muted text-[9px]"
+                >
+                  {item.label.length > 16
+                    ? `${item.label.slice(0, 14)}…`
+                    : item.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
     </CardShell>
   );
 }

@@ -6,6 +6,15 @@ const statusStyles: Record<string, string> = {
   COMPLETED: "bg-accent text-white",
   CANCELLED: "bg-border text-muted",
   NOT_STARTED: "bg-secondary text-muted",
+  DRAFT: "bg-secondary text-muted",
+  PUBLISHED: "bg-accent/15 text-accent",
+  ARCHIVED: "bg-border text-muted",
+  SCHEDULED: "bg-highlight/15 text-highlight",
+  ACTIVE: "bg-accent/15 text-accent",
+  DISABLED: "bg-border text-muted",
+  HIGH: "bg-danger/15 text-danger",
+  MEDIUM: "bg-highlight/15 text-highlight",
+  LOW: "bg-secondary text-muted",
 };
 
 const statusLabels: Record<string, string> = {
@@ -14,6 +23,12 @@ const statusLabels: Record<string, string> = {
   COMPLETED: "Completed",
   CANCELLED: "Cancelled",
   NOT_STARTED: "Not started",
+  DRAFT: "Draft",
+  PUBLISHED: "Published",
+  ARCHIVED: "Archived",
+  SCHEDULED: "Scheduled",
+  ACTIVE: "Active",
+  DISABLED: "Disabled",
 };
 
 export function StatusBadge({

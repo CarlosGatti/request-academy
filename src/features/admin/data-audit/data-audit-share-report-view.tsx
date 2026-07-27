@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { FileSpreadsheet } from "lucide-react";
 import {
   AgentTypeDonutCard,
   AvailabilityStatusCard,
   CompletenessKpiCard,
+  FindingsSeverityCard,
   NewRegistrationsMonthlyCard,
   SimpleBarCard,
   SpecializationsPieCard,
   TopCitiesBarCard,
   type DistItem,
   type MonthlyRegistrations,
+  type SeverityDetail,
 } from "@/features/admin/data-audit/chart-cards";
 import {
   DemographicMapCard,
@@ -215,16 +217,19 @@ export function DataAuditShareReportView({ token }: { token: string }) {
   const profiles = report.profiles ?? [];
   const exposureFindings = report.exposureFindings ?? [];
   const discrepancyFindings = report.discrepancyFindings ?? [];
-
-  const filteredProfiles = useMemo(() => {
-    const q = profileSearch.trim().toLowerCase();
-    if (!q) return profiles;
-    return profiles.filter((profile) =>
-      [profile.displayName, profile.agencyName, profile.agentType, profile.slug]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(q)),
-    );
-  }, [profiles, profileSearch]);
+  const profileQuery = profileSearch.trim().toLowerCase();
+  const filteredProfiles = !profileQuery
+    ? profiles
+    : profiles.filter((profile) =>
+        [
+          profile.displayName,
+          profile.agencyName,
+          profile.agentType,
+          profile.slug,
+        ]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(profileQuery)),
+      );
 
   if (loading && !data) {
     return (
@@ -409,12 +414,19 @@ export function DataAuditShareReportView({ token }: { token: string }) {
                 className="col-span-1 md:col-span-2"
                 items={(dist.cities as DistItem[]) ?? []}
               />
-              <SimpleBarCard
-                className="col-span-1"
-                title="Findings by severity"
+              <FindingsSeverityCard
+                className="col-span-1 md:col-span-2"
                 items={
+                  (dist.findingsBySeverityDetail as SeverityDetail[]) ?? []
+                }
+                fallback={
                   report.findingsSummary?.bySeverity ??
                   ((dist.findingsBySeverity as DistItem[]) ?? [])
+                }
+                note={
+                  typeof dist.findingsCountingNote === "string"
+                    ? dist.findingsCountingNote
+                    : report.findingsSummary?.note ?? null
                 }
               />
               <SimpleBarCard

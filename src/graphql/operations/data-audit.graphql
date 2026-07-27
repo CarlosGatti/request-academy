@@ -8,10 +8,14 @@ query DataAuditOverview {
     latestRun {
       id
       status
-      completedAt
       profileCount
+      agentCount
+      lenderCount
       discrepancyCount
       exposureFindingCount
+      completedAt
+      requestedByName
+      requestedByEmail
       errorMessage
     }
   }
@@ -49,11 +53,13 @@ query DataAuditProfiles($filter: DataAuditProfilesFilterInput) {
     total
     items {
       id
+      sourceProfileId
       displayName
-      avatarUrl
-      avatarPath
+      slug
       agentType
       agencyName
+      avatarUrl
+      avatarPath
       yearsInBusiness
       yearsInArea
       contractsCompleted
@@ -61,6 +67,7 @@ query DataAuditProfiles($filter: DataAuditProfilesFilterInput) {
       clientSpecializations
       isVerified
       isProfileComplete
+      profileCompleteness
       hasEmail
       hasPhone
       hasDocumentReferences
@@ -74,7 +81,11 @@ query DataAuditProfiles($filter: DataAuditProfilesFilterInput) {
 query DataAuditProfile($id: Int!, $includeRaw: Boolean) {
   dataAuditProfile(id: $id, includeRaw: $includeRaw) {
     id
+    sourceProfileId
     displayName
+    firstName
+    lastName
+    slug
     avatarUrl
     avatarPath
     agentType
@@ -110,6 +121,7 @@ query DataAuditProfile($id: Int!, $includeRaw: Boolean) {
       status
       title
       description
+      recommendation
       category
       fieldPath
     }
