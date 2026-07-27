@@ -26,6 +26,7 @@ const nav = [
   { href: "/admin/partners", label: "Partners" },
   { href: "/admin/short-links", label: "Short links" },
   { href: "/admin/campaigns", label: "Campaigns" },
+  { href: "/admin/data-audit", label: "Data Audit Lab" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

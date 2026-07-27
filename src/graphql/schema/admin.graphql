@@ -425,3 +425,291 @@ extend type Mutation {
     input: UpdateDefinedAcademyReferralCampaignInput!
   ): DefinedAcademyReferralCampaign!
 }
+
+# ---------------------------------------------------------------------------
+# Data Audit Lab (internal admin)
+# ---------------------------------------------------------------------------
+
+enum DataAuditRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum DataAuditFindingStatus {
+  OPEN
+  REVIEWED
+  ACCEPTED_RISK
+  FALSE_POSITIVE
+  FIXED
+}
+
+enum DataAuditFieldClassification {
+  PUBLIC
+  PERSONAL
+  INTERNAL
+  SENSITIVE
+  SECURITY_RELEVANT
+  UNKNOWN
+}
+
+type DataAuditRun {
+  id: Int!
+  status: DataAuditRunStatus!
+  source: String!
+  sourceBaseUrl: String
+  startedAt: DateTime
+  completedAt: DateTime
+  failedAt: DateTime
+  requestedByUserId: Int
+  requestedByName: String
+  requestedByEmail: String
+  requestCount: Int!
+  profileCount: Int!
+  agentCount: Int!
+  lenderCount: Int!
+  newProfileCount: Int!
+  changedProfileCount: Int!
+  removedProfileCount: Int!
+  discrepancyCount: Int!
+  exposureFindingCount: Int!
+  schemaFieldCount: Int!
+  errorMessage: String
+  overviewMetrics: JSON
+  contentInsights: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DataAuditOverview {
+  lastSuccessfulAuditAt: DateTime
+  currentStatus: DataAuditRunStatus
+  currentRunId: Int
+  overviewMetrics: JSON
+  contentInsights: JSON
+  latestRun: DataAuditRun
+}
+
+type DataAuditProfileListItem {
+  id: Int!
+  auditRunId: Int!
+  sourceProfileId: String!
+  slug: String
+  displayName: String
+  avatarUrl: String
+  avatarPath: String
+  agentType: String
+  agencyName: String
+  yearsInBusiness: Float
+  yearsInArea: Float
+  contractsCompleted: Float
+  states: JSON
+  cities: JSON
+  clientSpecializations: JSON
+  propertyTypes: JSON
+  isVerified: Boolean
+  isPublic: Boolean
+  isProfileComplete: Boolean
+  profileCompleteness: Float
+  hasEmail: Boolean!
+  hasPhone: Boolean!
+  hasDocumentReferences: Boolean!
+  documentReferenceCount: Int!
+  findingCount: Int!
+  highestSeverity: String
+}
+
+type DataAuditProfileConnection {
+  auditRunId: Int
+  total: Int!
+  items: [DataAuditProfileListItem!]!
+}
+
+type DataAuditFindingProfileRef {
+  id: Int!
+  displayName: String
+  slug: String
+  agentType: String
+}
+
+type DataAuditFinding {
+  id: Int!
+  auditRunId: Int!
+  profileId: Int
+  category: String!
+  severity: String!
+  status: DataAuditFindingStatus!
+  ruleCode: String!
+  title: String!
+  description: String!
+  fieldPath: String
+  expectedValue: JSON
+  actualValue: JSON
+  recommendation: String
+  reviewNote: String
+  reviewedByUserId: Int
+  reviewedAt: DateTime
+  createdAt: DateTime!
+  profile: DataAuditFindingProfileRef
+}
+
+type DataAuditFindingConnection {
+  auditRunId: Int
+  total: Int!
+  items: [DataAuditFinding!]!
+}
+
+type DataAuditProfileDetail {
+  id: Int!
+  auditRunId: Int!
+  sourceProfileId: String!
+  slug: String
+  firstName: String
+  lastName: String
+  displayName: String
+  avatarUrl: String
+  avatarPath: String
+  agentType: String
+  agencyName: String
+  yearsInBusiness: Float
+  yearsInArea: Float
+  contractsCompleted: Float
+  states: JSON
+  cities: JSON
+  clientSpecializations: JSON
+  propertyTypes: JSON
+  pricePoints: JSON
+  loanTypes: JSON
+  certifications: JSON
+  documentReferenceCount: Int!
+  isPublic: Boolean
+  isVerified: Boolean
+  verificationStatus: String
+  isProfileComplete: Boolean
+  profileCompleteness: Float
+  hasEmail: Boolean!
+  hasPhone: Boolean!
+  hasVerificationNote: Boolean!
+  hasVerifiedBy: Boolean!
+  hasDocumentReferences: Boolean!
+  hasTokenLikeFields: Boolean!
+  normalizedPayload: JSON
+  rawMasked: JSON
+  findings: [DataAuditFinding!]!
+}
+
+type DataAuditSchemaField {
+  id: Int!
+  auditRunId: Int!
+  fieldPath: String!
+  detectedTypes: JSON!
+  occurrenceCount: Int!
+  profileCoverage: Float!
+  classification: DataAuditFieldClassification!
+  expectedPublic: Boolean
+  academyUseful: Boolean
+  sampleValueMasked: String
+  notes: String
+}
+
+input DataAuditProfilesFilterInput {
+  auditRunId: Int
+  search: String
+  agentType: String
+  isVerified: Boolean
+  isPublic: Boolean
+  isProfileComplete: Boolean
+  hasEmail: Boolean
+  hasPhone: Boolean
+  hasDocumentReferences: Boolean
+  skip: Int
+  take: Int
+}
+
+input DataAuditFindingsFilterInput {
+  auditRunId: Int
+  category: String
+  severity: String
+  status: String
+  ruleCode: String
+  exposureOnly: Boolean
+  skip: Int
+  take: Int
+}
+
+input UpdateDataAuditFindingStatusInput {
+  status: DataAuditFindingStatus!
+  reviewNote: String
+}
+
+input UpdateDataAuditSchemaFieldInput {
+  classification: DataAuditFieldClassification
+  expectedPublic: Boolean
+  academyUseful: Boolean
+  notes: String
+}
+
+input CreateDataAuditShareInput {
+  auditRunId: Int
+  title: String
+  recipientName: String
+  personalMessage: String
+  inviteCtaLabel: String
+  invitePath: String
+  expiresInDays: Int
+}
+
+type DataAuditShareLink {
+  id: Int!
+  auditRunId: Int!
+  token: String!
+  title: String!
+  recipientName: String
+  personalMessage: String
+  inviteCtaLabel: String
+  invitePath: String
+  shareUrl: String!
+  viewCount: Int!
+  lastViewedAt: DateTime
+  expiresAt: DateTime
+  revokedAt: DateTime
+  createdAt: DateTime!
+  isActive: Boolean!
+}
+
+type DataAuditSharePublic {
+  title: String!
+  recipientName: String
+  personalMessage: String
+  inviteCtaLabel: String!
+  inviteUrl: String!
+  expiresAt: DateTime
+  report: JSON!
+}
+
+extend type Query {
+  dataAuditOverview: DataAuditOverview!
+  dataAuditRuns(take: Int): [DataAuditRun!]!
+  dataAuditRun(id: Int!): DataAuditRun
+  dataAuditProfiles(filter: DataAuditProfilesFilterInput): DataAuditProfileConnection!
+  dataAuditProfile(id: Int!, includeRaw: Boolean): DataAuditProfileDetail
+  dataAuditSchemaFields(auditRunId: Int): [DataAuditSchemaField!]!
+  dataAuditFindings(filter: DataAuditFindingsFilterInput): DataAuditFindingConnection!
+  dataAuditShares(take: Int): [DataAuditShareLink!]!
+  dataAuditSharePublic(token: String!): DataAuditSharePublic!
+}
+
+extend type Mutation {
+  startDataAuditRun: DataAuditRun!
+  updateDataAuditFindingStatus(
+    id: Int!
+    input: UpdateDataAuditFindingStatusInput!
+  ): DataAuditFinding!
+  updateDataAuditSchemaField(
+    id: Int!
+    input: UpdateDataAuditSchemaFieldInput!
+  ): DataAuditSchemaField!
+  createDataAuditShareLink(input: CreateDataAuditShareInput): DataAuditShareLink!
+  revokeDataAuditShareLink(id: Int!): DataAuditShareLink!
+}

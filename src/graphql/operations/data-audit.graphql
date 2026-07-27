@@ -1,0 +1,246 @@
+query DataAuditOverview {
+  dataAuditOverview {
+    lastSuccessfulAuditAt
+    currentStatus
+    currentRunId
+    overviewMetrics
+    contentInsights
+    latestRun {
+      id
+      status
+      completedAt
+      profileCount
+      discrepancyCount
+      exposureFindingCount
+      errorMessage
+    }
+  }
+}
+
+query DataAuditRuns($take: Int) {
+  dataAuditRuns(take: $take) {
+    id
+    status
+    source
+    startedAt
+    completedAt
+    failedAt
+    requestedByUserId
+    requestedByName
+    requestedByEmail
+    requestCount
+    profileCount
+    agentCount
+    lenderCount
+    newProfileCount
+    changedProfileCount
+    removedProfileCount
+    discrepancyCount
+    exposureFindingCount
+    schemaFieldCount
+    errorMessage
+    createdAt
+  }
+}
+
+query DataAuditProfiles($filter: DataAuditProfilesFilterInput) {
+  dataAuditProfiles(filter: $filter) {
+    auditRunId
+    total
+    items {
+      id
+      displayName
+      avatarUrl
+      avatarPath
+      agentType
+      agencyName
+      yearsInBusiness
+      yearsInArea
+      contractsCompleted
+      cities
+      clientSpecializations
+      isVerified
+      isProfileComplete
+      hasEmail
+      hasPhone
+      hasDocumentReferences
+      documentReferenceCount
+      findingCount
+      highestSeverity
+    }
+  }
+}
+
+query DataAuditProfile($id: Int!, $includeRaw: Boolean) {
+  dataAuditProfile(id: $id, includeRaw: $includeRaw) {
+    id
+    displayName
+    avatarUrl
+    avatarPath
+    agentType
+    agencyName
+    yearsInBusiness
+    yearsInArea
+    contractsCompleted
+    states
+    cities
+    clientSpecializations
+    propertyTypes
+    pricePoints
+    loanTypes
+    certifications
+    isPublic
+    isVerified
+    verificationStatus
+    isProfileComplete
+    profileCompleteness
+    hasEmail
+    hasPhone
+    hasVerificationNote
+    hasVerifiedBy
+    hasDocumentReferences
+    hasTokenLikeFields
+    documentReferenceCount
+    normalizedPayload
+    rawMasked
+    findings {
+      id
+      ruleCode
+      severity
+      status
+      title
+      description
+      category
+      fieldPath
+    }
+  }
+}
+
+query DataAuditSchemaFields($auditRunId: Int) {
+  dataAuditSchemaFields(auditRunId: $auditRunId) {
+    id
+    fieldPath
+    detectedTypes
+    occurrenceCount
+    profileCoverage
+    classification
+    expectedPublic
+    academyUseful
+    sampleValueMasked
+    notes
+  }
+}
+
+query DataAuditFindings($filter: DataAuditFindingsFilterInput) {
+  dataAuditFindings(filter: $filter) {
+    auditRunId
+    total
+    items {
+      id
+      severity
+      category
+      ruleCode
+      title
+      description
+      fieldPath
+      status
+      recommendation
+      createdAt
+      profile {
+        id
+        displayName
+        slug
+      }
+    }
+  }
+}
+
+mutation StartDataAuditRun {
+  startDataAuditRun {
+    id
+    status
+    createdAt
+  }
+}
+
+mutation UpdateDataAuditFindingStatus(
+  $id: Int!
+  $input: UpdateDataAuditFindingStatusInput!
+) {
+  updateDataAuditFindingStatus(id: $id, input: $input) {
+    id
+    status
+    reviewedAt
+    reviewNote
+  }
+}
+
+mutation UpdateDataAuditSchemaField(
+  $id: Int!
+  $input: UpdateDataAuditSchemaFieldInput!
+) {
+  updateDataAuditSchemaField(id: $id, input: $input) {
+    id
+    classification
+    expectedPublic
+    academyUseful
+    notes
+  }
+}
+
+query DataAuditShares($take: Int) {
+  dataAuditShares(take: $take) {
+    id
+    auditRunId
+    token
+    title
+    recipientName
+    personalMessage
+    inviteCtaLabel
+    shareUrl
+    viewCount
+    lastViewedAt
+    expiresAt
+    revokedAt
+    createdAt
+    isActive
+  }
+}
+
+mutation CreateDataAuditShareLink($input: CreateDataAuditShareInput) {
+  createDataAuditShareLink(input: $input) {
+    id
+    auditRunId
+    token
+    title
+    recipientName
+    personalMessage
+    inviteCtaLabel
+    shareUrl
+    viewCount
+    expiresAt
+    revokedAt
+    createdAt
+    isActive
+  }
+}
+
+mutation RevokeDataAuditShareLink($id: Int!) {
+  revokeDataAuditShareLink(id: $id) {
+    id
+    revokedAt
+    isActive
+  }
+}
+
+query DataAuditSharePublic($token: String!) {
+  dataAuditSharePublic(token: $token) {
+    title
+    recipientName
+    personalMessage
+    inviteCtaLabel
+    inviteUrl
+    expiresAt
+    report
+  }
+}

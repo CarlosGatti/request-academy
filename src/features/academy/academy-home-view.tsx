@@ -72,10 +72,8 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
     featuredPartners.length ? featuredPartners : partners
   ).slice(0, 3);
   const featuredCourse = courses[0];
-  /** Avoid repeating the featured program in the catalog grid. */
-  const gridCourses = featuredCourse
-    ? courses.filter((course) => course.id !== featuredCourse.id).slice(0, 6)
-    : courses.slice(0, 6);
+  /** Latest programs on the homepage; View all opens the full catalog. */
+  const gridCourses = courses.slice(0, 3);
 
   return (
     <>
@@ -113,15 +111,11 @@ export function AcademyHomeView({ academySlug }: { academySlug: string }) {
           </div>
           {coursesQuery.loading && !courses.length ? (
             <PageLoading rows={2} />
-          ) : gridCourses.length === 0 && !featuredCourse ? (
+          ) : gridCourses.length === 0 ? (
             <EmptyState
               title="No programs published yet"
               description="Check back soon for new professional development pathways."
             />
-          ) : gridCourses.length === 0 ? (
-            <p className="text-sm text-muted">
-              More programs will appear here as they are published.
-            </p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {gridCourses.map((course) => (
