@@ -9,6 +9,59 @@ import { clientEnv } from "@/lib/env/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { cn } from "@/lib/utils/cn";
 
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.5l.5-3H14V9z" />
+    </svg>
+  );
+}
+
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M6.5 8.5A1.75 1.75 0 1 1 6.5 5a1.75 1.75 0 0 1 0 3.5zM5 10h3v9H5v-9zm5 0h2.9v1.2h.1c.4-.8 1.4-1.5 2.9-1.5 3.1 0 3.6 2 3.6 4.6V19h-3v-4.1c0-1 0-2.3-1.4-2.3s-1.6 1.1-1.6 2.2V19h-3v-9z" />
+    </svg>
+  );
+}
+
+const socialLinks = [
+  {
+    href: "https://www.instagram.com/re.quest.official",
+    label: "Instagram",
+    Icon: InstagramIcon,
+  },
+  {
+    href: "https://www.facebook.com/re.quest.social",
+    label: "Facebook",
+    Icon: FacebookIcon,
+  },
+  {
+    href: "https://www.linkedin.com/company/re-quest001/",
+    label: "LinkedIn",
+    Icon: LinkedInIcon,
+  },
+] as const;
+
 export function PublicHeader() {
   const academySlug = clientEnv.NEXT_PUBLIC_DEFAULT_ACADEMY_SLUG;
   const { isAuthenticated, hasDefinedAccess } = useAuth();
@@ -141,6 +194,20 @@ export function PublicFooter() {
               RE-Quest Academy — professional growth for real estate, every step
               of the way.
             </p>
+            <div className="flex items-center gap-2 pt-1">
+              {socialLinks.map(({ href, label, Icon }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`RE-Quest on ${label}`}
+                  className="inline-flex size-9 items-center justify-center rounded-md border border-border text-primary transition-colors hover:bg-sea-foam hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                >
+                  <Icon className="size-4" aria-hidden />
+                </a>
+              ))}
+            </div>
           </div>
 
           <div>

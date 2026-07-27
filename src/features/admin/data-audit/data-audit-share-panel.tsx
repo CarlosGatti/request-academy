@@ -24,6 +24,13 @@ function localShareUrl(token: string, fallbackUrl: string) {
   return fallbackUrl;
 }
 
+function formatShareDate(value: unknown): string | null {
+  if (value == null || value === "") return null;
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString();
+}
+
 export function DataAuditSharePanel() {
   const sharesQuery = useQuery(DataAuditSharesDocument, {
     variables: { take: 10 },
@@ -187,7 +194,9 @@ export function DataAuditSharePanel() {
           <p className="text-sm text-muted">No share links yet.</p>
         ) : (
           <ul className="divide-y divide-border border border-border">
-            {shares.map((share) => (
+            {shares.map((share) => {
+              const expiresLabel = formatShareDate(share.expiresAt);
+              return (
               <li
                 key={share.id}
                 className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
@@ -204,9 +213,7 @@ export function DataAuditSharePanel() {
                   <p className="text-xs text-muted">
                     {share.recipientName ? `For ${share.recipientName} · ` : null}
                     Audit #{share.auditRunId} · {share.viewCount} views
-                    {share.expiresAt
-                      ? ` · expires ${new Date(share.expiresAt).toLocaleDateString()}`
-                      : null}
+                    {expiresLabel ? ` · expires ${expiresLabel}` : null}
                   </p>
                   <p className="truncate text-xs text-muted">
                     {localShareUrl(share.token, share.shareUrl)}
@@ -240,7 +247,8 @@ export function DataAuditSharePanel() {
                   ) : null}
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </div>

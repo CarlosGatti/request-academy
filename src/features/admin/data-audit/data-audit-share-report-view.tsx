@@ -105,6 +105,16 @@ function asMonthly(value: unknown): MonthlyRegistrations | null {
   return value as MonthlyRegistrations;
 }
 
+function formatUnknownDate(
+  value: unknown,
+  mode: "date" | "datetime" = "date",
+): string | null {
+  if (value == null || value === "") return null;
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return null;
+  return mode === "datetime" ? date.toLocaleString() : date.toLocaleDateString();
+}
+
 function downloadCsv(filename: string, headers: string[], rows: string[][]) {
   const lines = [
     headers.join(","),
@@ -289,17 +299,19 @@ export function DataAuditShareReportView({ token }: { token: string }) {
             </p>
           )}
           <div className="flex flex-wrap gap-3 pt-2 text-xs text-muted">
-            {report.auditCompletedAt ? (
-              <span>
-                Audit completed{" "}
-                {new Date(report.auditCompletedAt).toLocaleString()}
-              </span>
-            ) : null}
-            {share.expiresAt ? (
-              <span>
-                · Link expires {new Date(share.expiresAt).toLocaleDateString()}
-              </span>
-            ) : null}
+            {(() => {
+              const completed = formatUnknownDate(
+                report.auditCompletedAt,
+                "datetime",
+              );
+              const expires = formatUnknownDate(share.expiresAt);
+              return (
+                <>
+                  {completed ? <span>Audit completed {completed}</span> : null}
+                  {expires ? <span>· Link expires {expires}</span> : null}
+                </>
+              );
+            })()}
           </div>
         </Container>
       </section>
