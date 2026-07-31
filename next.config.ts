@@ -42,17 +42,31 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    if (!apiOrigin) return [];
-
-    // Proxy media URLs stored as /uploads/... so the Vercel app can serve them.
-    // Uploads themselves POST directly to the API host (see uploads.ts) — that
-    // requires Nginx CORS for the frontend origin in production.
-    return [
+    const rules = [
+      // Same-origin basemap proxy — avoids OSM blocks / CDN ad-blockers on public share pages.
       {
-        source: "/uploads/:path*",
-        destination: `${apiOrigin}/uploads/:path*`,
+        source: "/map-tiles/light/:z/:x/:y.png",
+        destination:
+          "https://a.basemaps.cartocdn.com/light_all/:z/:x/:y.png",
+      },
+      {
+        source: "/map-tiles/streets/:z/:y/:x",
+        destination:
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/:z/:y/:x",
       },
     ];
+
+    if (apiOrigin) {
+      // Proxy media URLs stored as /uploads/... so the Vercel app can serve them.
+      // Uploads themselves POST directly to the API host (see uploads.ts) — that
+      // requires Nginx CORS for the frontend origin in production.
+      rules.push({
+        source: "/uploads/:path*",
+        destination: `${apiOrigin}/uploads/:path*`,
+      });
+    }
+
+    return rules;
   },
 };
 
