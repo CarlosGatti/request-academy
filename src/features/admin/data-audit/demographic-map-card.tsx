@@ -30,6 +30,15 @@ export type GeoMapData = {
   note?: string;
 };
 
+function normalizeGeoMapData(data: GeoMapData | null | undefined): GeoMapData | null {
+  if (!data || typeof data !== "object") return null;
+  const pins = Array.isArray(data.pins) ? data.pins : [];
+  return {
+    ...data,
+    pins,
+  };
+}
+
 export function DemographicMapCard({
   data,
   className,
@@ -37,9 +46,10 @@ export function DemographicMapCard({
   data: GeoMapData | null;
   className?: string;
 }) {
-  const pins = data?.pins ?? [];
-  const pinned = data?.pinnedProfiles ?? pins.length;
-  const total = data?.totalProfiles ?? pins.length;
+  const normalized = normalizeGeoMapData(data);
+  const pins = normalized?.pins ?? [];
+  const pinned = normalized?.pinnedProfiles ?? pins.length;
+  const total = normalized?.totalProfiles ?? pins.length;
 
   return (
     <section className={cn("border border-border bg-surface p-4", className)}>
@@ -47,7 +57,7 @@ export function DemographicMapCard({
         <div>
           <h3 className="font-medium text-primary">Demographic map</h3>
           <p className="mt-1 max-w-2xl text-xs text-muted">
-            {data?.note ??
+            {normalized?.note ??
               "Professionals placed by public coordinates or approximate city centers."}
           </p>
         </div>
@@ -55,16 +65,20 @@ export function DemographicMapCard({
           <span className="text-lg font-medium text-primary">{pinned}</span>
           {" / "}
           {total} pinned
-          {data?.withApiCoords ? ` · ${data.withApiCoords} exact` : null}
-          {data?.withCityLookup ? ` · ${data.withCityLookup} city approx.` : null}
+          {normalized?.withApiCoords
+            ? ` · ${normalized.withApiCoords} exact`
+            : null}
+          {normalized?.withCityLookup
+            ? ` · ${normalized.withCityLookup} city approx.`
+            : null}
         </p>
       </div>
 
       <DemographicMapInner pins={pins} />
 
-      {data?.topCities?.length ? (
+      {normalized?.topCities?.length ? (
         <ul className="mt-3 flex flex-wrap gap-2">
-          {data.topCities.map((row) => (
+          {normalized.topCities.map((row) => (
             <li
               key={row.city}
               className="rounded-sm bg-secondary px-2 py-1 text-xs text-primary"
@@ -76,11 +90,11 @@ export function DemographicMapCard({
         </ul>
       ) : null}
 
-      {data?.unresolvedCount ? (
+      {normalized?.unresolvedCount ? (
         <p className="mt-2 text-xs text-muted">
-          {data.unresolvedCount} profile
-          {data.unresolvedCount === 1 ? "" : "s"} could not be placed (missing
-          city / unknown location).
+          {normalized.unresolvedCount} profile
+          {normalized.unresolvedCount === 1 ? "" : "s"} could not be placed
+          (missing city / unknown location).
         </p>
       ) : null}
 

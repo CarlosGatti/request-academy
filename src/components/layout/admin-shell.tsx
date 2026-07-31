@@ -254,7 +254,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
             firstName={user?.firstName}
             lastName={user?.lastName}
             email={user?.email}
-            size={32}
+            size={48}
             className="bg-sea-foam/20 text-sea-foam ring-1 ring-sea-foam/30"
           />
           <ChromeUserLabel>{displayName}</ChromeUserLabel>
