@@ -42,6 +42,16 @@ body {
   color: var(--color-tidal-blue);
 }
 
+/* Leaflet tiles break under Tailwind's img { max-width: 100% } preflight */
+.leaflet-container img.leaflet-tile {
+  max-width: none !important;
+}
+
+.leaflet-container {
+  background: #e8eef3;
+  font: inherit;
+}
+
 @keyframes hero-fade-up {
   from {
     opacity: 0;
